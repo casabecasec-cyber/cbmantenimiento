@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mantenimiento · CasaBecas</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+
+body{background:var(--bg);color:var(--tx);font-family:'Space Grotesk',sans-serif;margin:0;}
+:root{--bg:#f3f4fa;--s:#ffffff;--s2:#eceefa;--bd:#dde1f0;--ac:#6c63ff;--gr:#16a34a;--ye:#b45309;--re:#dc2626;--or:#ea580c;--tx:#1c1f2b;--mu:#6b7280;}
+.screen{display:none;}
+.screen.active{display:block;}
+/* LOGIN */
+#scr-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.lbox{background:var(--s);border:1px solid var(--bd);border-radius:20px;padding:36px 32px;width:100%;max-width:360px;text-align:center;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.lbox.shake{animation:shake .4s ease;}
+.ll{font-size:42px;margin-bottom:10px;}
+.lt{font-size:20px;font-weight:700;margin-bottom:4px;}.lt span{color:var(--ac);}
+.ls{font-size:13px;color:var(--mu);margin-bottom:20px;}
+.lf{position:relative;margin-bottom:12px;}
+.lf input{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 44px 12px 16px;color:var(--tx);font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;letter-spacing:0;}
+.lf input:focus{border-color:var(--ac);}
+.lf input::placeholder{letter-spacing:0;}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;}
+.lbtn{width:100%;background:var(--ac);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.lbtn:hover{background:#5a52d5;}
+.lerr{color:var(--re);font-size:12px;margin-top:10px;min-height:18px;font-weight:500;}
+.lfoot{font-size:11px;color:#9aa0b8;margin-top:20px;}
+/* APP */
+header{background:var(--s);border-bottom:1px solid var(--bd);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+.logo{font-size:16px;font-weight:700;}.logo span{color:var(--ac);}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.rbadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.rb-a{background:rgba(108,99,255,.2);color:var(--ac);border:1px solid rgba(108,99,255,.4);}
+.rb-o{background:rgba(255,159,67,.15);color:var(--or);border:1px solid rgba(255,159,67,.3);}
+main{padding:22px 18px;max-width:1200px;margin:0 auto;}
+/* BUTTONS */
+.btn{padding:8px 16px;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;}
+.btn-p{background:var(--ac);color:#fff;}.btn-p:hover{background:#5a52d5;}
+.btn-g{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
+.btn-y{background:rgba(180,83,9,.12);color:var(--ye);border:1px solid rgba(180,83,9,.3);}
+.btn-d{background:rgba(255,71,87,.1);color:var(--re);border:1px solid rgba(255,71,87,.2);}
+.btn-s{background:var(--s2);color:var(--mu);border:1px solid var(--bd);}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px;}
+.btn-gh{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:8px 16px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;}
+.btn-gh:hover{border-color:var(--tx);color:var(--tx);}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.stat{background:var(--s);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;text-align:center;}
+.stat .n{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;margin-bottom:2px;}
+.stat .l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;}
+.c-ac{color:var(--ac);}.c-gr{color:var(--gr);}.c-ye{color:var(--ye);}.c-re{color:var(--re);}
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.inp{background:var(--s);border:1px solid var(--bd);border-radius:9px;padding:8px 13px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;}
+.inp:focus{border-color:var(--ac);}
+.chip{padding:5px 13px;border:1px solid var(--bd);background:var(--s2);color:var(--mu);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.chip.on{border-color:var(--ac);background:rgba(108,99,255,.15);color:var(--ac);}
+/* TASK CARDS */
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.task-card{background:var(--s);border:1px solid var(--bd);border-radius:14px;padding:16px;transition:transform .18s,box-shadow .18s;}
+.task-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(30,34,60,.10);}
+.task-card.overdue{border-color:rgba(255,71,87,.45);}
+.task-card.due-soon{border-color:rgba(180,83,9,.4);}
+.task-card.ok{border-color:rgba(56,224,123,.25);}
+.tc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.tc-icon{font-size:28px;flex-shrink:0;}
+.tc-info{flex:1;}
+.tc-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.tc-lugar{font-size:11px;color:var(--mu);font-family:'DM Mono',monospace;}
+.tc-status{margin-left:auto;flex-shrink:0;}
+.status-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;}
+.sd-ok{background:var(--gr);box-shadow:0 0 6px var(--gr);}
+.sd-warn{background:var(--ye);box-shadow:0 0 6px var(--ye);animation:pu 1.5s infinite;}
+.sd-over{background:var(--re);box-shadow:0 0 6px var(--re);animation:pu 1s infinite;}
+@keyframes pu{0%,100%{opacity:1;}50%{opacity:.3;}}
+.tc-desc{font-size:12px;color:var(--mu);margin-bottom:10px;line-height:1.5;}
+.tc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--s2);color:var(--mu);border:1px solid var(--bd);}
+.tag-freq{color:var(--ac);border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.08);}
+.tag-over{color:var(--re);border-color:rgba(255,71,87,.3);background:rgba(255,71,87,.08);}
+.tag-soon{color:var(--ye);border-color:rgba(180,83,9,.3);background:rgba(180,83,9,.08);}
+.tag-ok{color:var(--gr);border-color:rgba(56,224,123,.3);background:rgba(56,224,123,.08);}
+.tc-next{font-size:11px;color:var(--mu);margin-bottom:10px;}
+.tc-next span{font-weight:600;color:var(--tx);}
+.tc-acts{display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--bd);padding-top:10px;margin-top:2px;}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+.ov.open{display:flex;}
+.modal{background:var(--s);border:1px solid var(--bd);border-radius:18px;padding:24px;width:100%;max-width:580px;margin:auto;animation:msu .2s ease;}
+.modal-lg{max-width:720px;}
+@keyframes msu{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal h3{font-size:16px;margin-bottom:6px;}
+.msub{font-size:12px;color:var(--mu);margin-bottom:18px;}
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color .2s;resize:vertical;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--ac);}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.mf{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;}
+.mdiv{height:1px;background:var(--bd);margin:16px 0;}
+/* CONTROL MENSUAL */
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px;}
+.month-item{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
+.mi-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.mi-emoji{font-size:20px;}
+.mi-name{font-size:13px;font-weight:600;flex:1;}
+.mi-done{width:20px;height:20px;border-radius:6px;border:2px solid var(--bd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .2s;}
+.mi-done.checked{background:var(--gr);border-color:var(--gr);color:#000;}
+.mi-obs textarea{width:100%;background:var(--s);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;resize:none;margin-top:6px;}
+.mi-obs textarea:focus{border-color:var(--ac);}
+/* HISTORIAL */
+.hist-list{max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.hi{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
+.hi-head{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+.hbadge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.hb-done{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
+.hb-pend{background:rgba(180,83,9,.12);color:var(--ye);border:1px solid rgba(180,83,9,.3);}
+.hb-add{background:rgba(108,99,255,.15);color:var(--ac);border:1px solid rgba(108,99,255,.3);}
+.hb-edit{background:rgba(255,159,67,.15);color:var(--or);border:1px solid rgba(255,159,67,.3);}
+.hi-name{font-size:13px;font-weight:700;flex:1;}
+.hi-rows{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;}
+.hi-f{color:var(--mu);}.hi-f strong{display:block;color:var(--tx);font-size:12px;font-weight:600;}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:12px 17px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .28s;max-width:300px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--gr);}.toast.warn{border-color:var(--ye);}.toast.err{border-color:var(--re);}
+.empty{text-align:center;padding:40px 20px;color:var(--mu);}
+.section-title{font-size:14px;font-weight:700;color:var(--mu);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--bd);}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr;}.r2{grid-template-columns:1fr;}.r3{grid-template-columns:1fr;}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  var c={apiKey:"AIzaSyDnciWUp7T2grbtOVp7gvdlBUA8i2LiplI",authDomain:"casabecas-8afea.firebaseapp.com",databaseURL:"https://casabecas-8afea-default-rtdb.firebaseio.com",projectId:"casabecas-8afea"};
+  if(!firebase.apps.length)firebase.initializeApp(c);
+  window._fbAuth=firebase.auth();
+  window._fbDb=firebase.database();
+  window._ROLES={'s51EqDX0m9hWmo9C4Hy00dFqD0C3':'admin','pNOVupR7DzPdEmQl9cOPN3JzJdH3':'oper'};
+})();
+</script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="scr-login">
+  <div class="lbox" id="lbox">
+    <div class="ll">🔧</div>
+    <div class="lt"><span>Mantenimiento</span></div>
+    <div class="ls">CasaBecas · Acceso al sistema</div>
+    <div class="lf" style="margin-bottom:8px">
+      <input type="email" id="auth-email" placeholder="Correo electrónico" autocomplete="email" style="width:100%" onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+    </div>
+    <div class="lf">
+      <input type="password" id="auth-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuthLogin()">
+      <button class="eye" onclick="var i=document.getElementById('auth-pass');i.type=i.type==='password'?'text':'password'">👁️</button>
+    </div>
+    <button class="lbtn" onclick="doAuthLogin()">🔐 Ingresar</button>
+    <div class="lerr" id="lerr"></div>
+    <div class="lfoot">CasaHub · Sistema privado</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="scr-app" style="display:none">
+  <header>
+    <div class="logo">🔧 <span>Mantenimiento</span></div>
+    <div class="hacts">
+      <div class="rbadge rb-a" id="rbadge">🔑</div>
+      <button id="btn-hist" class="btn btn-sm btn-s" onclick="openHist()">📋 Historial</button>
+      <button id="btn-ctrl" class="btn btn-sm btn-s" onclick="openControl()">📅 Control</button>
+      <button id="btn-crono" class="btn btn-sm btn-s" onclick="openCronograma()">🗓️ Cronograma de la semana</button>
+      <button id="btn-fechas" class="btn btn-sm btn-s" onclick="openFechas()">🕓 Actualizar fechas</button>
+      <button id="btn-audit" class="btn btn-sm btn-s" style="display:none" onclick="openAudit()">📊 Auditoría</button>
+      <button id="btn-xl" class="btn btn-sm" style="display:none;background:var(--gr);color:#000" onclick="exportXL()">📊 Excel</button>
+      <button id="btn-add" class="btn btn-p btn-sm" style="display:none" onclick="openAdd(null)">+ Nueva tarea</button>
+      <button id="btn-logout" class="btn btn-sm btn-s" onclick="doLogout()">⏻ Salir</button>
+    </div>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="stat"><div class="n c-ac" id="st-tot">0</div><div class="l">Total tareas</div></div>
+      <div class="stat"><div class="n c-re" id="st-over">0</div><div class="l">Vencidas</div></div>
+      <div class="stat"><div class="n c-gr" id="st-soon">0</div><div class="l">Próximas</div></div>
+      <div class="stat"><div class="n c-or" id="st-ok">0</div><div class="l">Al día</div></div>
+    </div>
+    <div class="filters">
+      <input id="search" type="text" placeholder="Buscar tarea..." oninput="render()" style="flex:1;min-width:160px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;color:var(--tx);font-size:13px">
+      <select id="fcat" onchange="render()" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;color:var(--tx);font-size:13px">
+        <option value="">Todas las categorías</option>
+        <option>Limpieza</option><option>Reparación</option><option>Inspección</option>
+        <option>Jardinería</option><option>Eléctrico</option><option>Plomería</option><option>Otro</option>
+      </select>
+      <select id="fstatus" onchange="render()" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;color:var(--tx);font-size:13px">
+        <option value="">Todos los estados</option>
+        <option value="ok">✅ Al día</option>
+        <option value="soon">⏰ Próximas</option>
+        <option value="over">⚠️ Vencidas</option>
+      </select>
+    </div>
+    <div id="tasks-grid"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL: AGREGAR/EDITAR TAREA -->
+<div class="ov" id="ov-add">
+<div class="modal">
+  <h3 id="add-title">➕ Nueva tarea</h3>
+  <div class="r2">
+    <div class="fg"><label>Emoji</label><input id="t-em" placeholder="🔧" style="font-size:20px;text-align:center;width:80px"></div>
+    <div class="fg"><label>Nombre de la tarea *</label><input id="t-name" placeholder="Ej: Revisar instalación eléctrica"></div>
+  </div>
+  <div class="r2">
+    <div class="fg"><label>Categoría</label>
+      <select id="t-cat">
+        <option value="General">General</option>
+        <option value="Limpieza">Limpieza</option><option value="Reparación">Reparación</option>
+        <option value="Inspección">Inspección</option><option value="Jardinería">Jardinería</option>
+        <option value="Eléctrico">Eléctrico</option><option value="Plomería">Plomería</option><option value="Pintura">Pintura</option><option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="fg"><label>Prioridad</label>
+      <select id="t-prio">
+        <option value="media">🟠 Media</option>
+        <option value="alta">🔴 Alta</option>
+        <option value="baja">🟢 Baja</option>
+      </select>
+    </div>
+  </div>
+  <div class="r2">
+    <div class="fg"><label>Frecuencia (días)</label>
+      <select id="t-freq">
+        <option value="7">Semanal (7d)</option>
+        <option value="15">Quincenal (15d)</option>
+        <option value="30" selected>Mensual (30d)</option>
+        <option value="60">Bimestral (60d)</option>
+        <option value="90">Trimestral (90d)</option>
+        <option value="180">Semestral (180d)</option>
+        <option value="365">Anual (365d)</option>
+      </select>
+    </div>
+    <div class="fg"><label>Responsable</label><input id="t-resp" placeholder="Nombre o empresa"></div>
+  </div>
+  <div class="fg"><label>Tipo de actividad</label>
+    <select id="t-tipo">
+      <option value="recurrente" selected>🔄 Recurrente (según frecuencia)</option>
+      <option value="unico">🏁 Un solo uso (se finaliza tras registrarla)</option>
+    </select>
+  </div>
+  <div class="fg"><label>Lugar</label><input id="t-lugar" placeholder="Cocina, baño, jardín..."></div>
+  <div class="fg"><label>Descripción</label><textarea id="t-desc" rows="2" placeholder="Detalles de la tarea..."></textarea></div>
+  <div class="r2">
+    <div class="fg"><label>Materiales estimados</label><input id="t-mat" placeholder="Lista de materiales..."></div>
+    <div class="fg"><label>Costo estimado ($)</label><input type="number" id="t-costo" placeholder="0.00" min="0" step="0.01"></div>
+  </div>
+  <div class="fg"><label>Último mantenimiento realizado</label><input type="date" id="t-last"></div>
+  <input type="hidden" id="t-id">
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-add')">Cancelar</button>
+    <button class="btn btn-p" onclick="saveTask()">💾 Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: INFO DE LA ACTIVIDAD -->
+<div class="ov" id="ov-info">
+<div class="modal">
+  <h3 id="info-title">ℹ️ Detalle de la actividad</h3>
+  <div id="info-body"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-info')">Cerrar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: REGISTRAR EJECUCION -->
+<div class="ov" id="ov-exec">
+<div class="modal">
+  <h3>✅ Registrar ejecución</h3>
+  <div class="fg"><label>Tarea</label><div id="exec-title" style="font-weight:600;padding:8px;background:var(--bg);border-radius:8px;font-size:14px"></div></div>
+  <div class="r2">
+    <div class="fg"><label>Fecha de ejecución *</label><input type="date" id="ex-fecha"></div>
+    <div class="fg"><label>Responsable</label><input id="ex-resp" placeholder="Quién realizó..."></div>
+  </div>
+  <div class="fg"><label>Trabajo realizado</label><textarea id="ex-trabajo" rows="2" placeholder="Describe lo que se hizo..."></textarea></div>
+  <div class="r2">
+    <div class="fg"><label>Materiales usados</label><input id="ex-mat" placeholder="Lista de materiales..."></div>
+    <div class="fg"><label>Costo ($)</label><input type="number" id="ex-costo" placeholder="0.00" min="0" step="0.01"></div>
+  </div>
+  <div class="fg"><label>Estado resultado</label>
+    <select id="ex-estado">
+      <option value="Completado">✅ Completado</option>
+      <option value="Parcial">⚠️ Parcial</option>
+      <option value="Requiere revisión">🔄 Requiere revisión</option>
+    </select>
+  </div>
+  <div class="fg"><label>Observaciones</label><textarea id="ex-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+  <input type="hidden" id="exec-tid">
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-exec')">Cancelar</button>
+    <button class="btn btn-p" onclick="saveExec()">✅ Registrar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: CONTROL MENSUAL -->
+<div class="ov" id="ov-control">
+<div class="modal modal-lg">
+  <h3>📅 Control mensual de mantenimiento</h3>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <input id="ctrl-mes-sel" type="month" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px" onchange="loadControlMes(this.value)">
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" id="ctrl-f-all" onclick="filterControl('all',this)" style="background:var(--ac);color:#fff;border:none">Todas</button>
+      <button class="btn btn-sm" id="ctrl-f-done" onclick="filterControl('done',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">✅ Ejecutadas</button>
+      <button class="btn btn-sm" id="ctrl-f-pend" onclick="filterControl('pend',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">⏳ Pendientes</button>
+    </div>
+  </div>
+  <p class="msub" id="control-mes">Mes actual</p>
+  <div class="month-grid" id="month-grid"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-control')">Cerrar</button>
+    <button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="exportControl()">📊 Descargar Excel</button>
+    <button class="btn btn-p" onclick="saveControl()">💾 Guardar control</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: ACTUALIZAR FECHAS EN LOTE -->
+<div class="ov" id="ov-fechas">
+<div class="modal modal-lg">
+  <h3>🕓 Actualizar última fecha realizada</h3>
+  <p class="msub">Ingresa la última fecha en que se hizo cada actividad y guarda todo de una sola vez</p>
+  <div id="fechas-list" style="max-height:55vh;overflow-y:auto;margin-top:10px"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-fechas')">Cerrar</button>
+    <button class="btn btn-p" onclick="saveFechas()">💾 Guardar todas las fechas</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: CRONOGRAMA DE LA SEMANA -->
+<div class="ov" id="ov-crono">
+<div class="modal modal-lg">
+  <h3>🗓️ Cronograma de la semana</h3>
+  <p class="msub">Tareas semanales y actividades que vencen en los próximos 7 días</p>
+  <p id="crono-cumplimiento" style="font-size:13px;font-weight:600;color:var(--ac);margin:6px 0 4px"></p>
+  <div id="crono-list" style="margin-top:10px"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-crono')">Cerrar</button>
+    <button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="downloadCronograma()">📥 Descargar cronograma</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: HISTORIAL -->
+<div class="ov" id="ov-hist">
+<div class="modal modal-lg">
+  <h3 style="margin-bottom:8px">📋 Historial de mantenimiento</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <input id="hist-search" type="text" placeholder="Buscar por tarea, detalle, responsable..." style="flex:1;min-width:180px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;color:var(--tx);font-size:13px" oninput="renderHist()">
+    <input id="hist-fecha" type="month" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px" onchange="renderHist()">
+    <button class="btn btn-sm btn-s" onclick="document.getElementById('hist-search').value='';document.getElementById('hist-fecha').value='';renderHist()">✕ Limpiar</button>
+  </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px" id="hchips">
+    <button class="chip on" onclick="fh('todos',this)">Todos</button>
+    <button class="chip" onclick="fh('exec',this)">✅ Ejecuciones</button>
+    <button class="chip" onclick="fh('control',this)">📅 Control</button>
+    <button class="chip" onclick="fh('add',this)">➕ Altas</button>
+    <button class="chip" onclick="fh('edit',this)">✏️ Ediciones</button>
+  </div>
+  <div id="hlist" style="max-height:55vh;overflow-y:auto"></div>
+  <div class="mf" style="margin-top:10px">
+    <button class="btn-gh" onclick="closeOv('ov-hist')">Cerrar</button>
+    <button id="btn-xl-hist" class="btn" style="background:var(--gr);color:#000" onclick="exportXL()">📊 Exportar Excel</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: AUDITORÍA -->
+<div class="ov" id="ov-audit">
+<div class="modal modal-lg">
+  <h3>📊 Auditoría del sistema</h3>
+  <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Registro de todas las acciones realizadas</p>
+  <div id="audit-list" style="max-height:60vh;overflow-y:auto"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-audit')">Cerrar</button>
+  </div>
+</div>
+</div>
+
+<script>
+
+function isAdmin(){return _role==='admin';}
+function isOper(){return _role==='oper';}
+function auditEntry(tipo,detalle,extra){
+  var e={tipo:tipo,detalle:detalle,quien:whoLabel(),fecha:now()};
+  if(extra)Object.assign(e,extra);
+  return e;
+}
+
+var _role='';
+var TASK_SEED = [{"id": "t1000", "emoji": "🔧", "name": "Bañar a los perros", "cat": "General", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1001", "emoji": "⚙️", "name": "Mantenimiento lavadora / secadora", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1002", "emoji": "⚙️", "name": "Mantenimiento de pool blaster", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1003", "emoji": "⚙️", "name": "Tanque de gas recarga", "cat": "Equipos", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1004", "emoji": "🧹", "name": "Limpieza de mesa exteriores", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1005", "emoji": "⚙️", "name": "Limpieza de sauna", "cat": "Equipos", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1006", "emoji": "🏗️", "name": "Mantenimiento puertas de aluminio", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1007", "emoji": "🔧", "name": "Compra de comida de perros", "cat": "General", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1008", "emoji": "🧹", "name": "Limpieza de cuarto de horno", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1009", "emoji": "⚙️", "name": "Revisión de máquinas", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1010", "emoji": "⚙️", "name": "Pendiente mant de hidro", "cat": "Equipos", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1011", "emoji": "⚡", "name": "Revisión de interruptores", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1012", "emoji": "⚡", "name": "Recarga de sensores de alarmas", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1013", "emoji": "🔧", "name": "Recarga de exintores", "cat": "General", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1014", "emoji": "⚡", "name": "Mant. De proyector, pantalla y electrónicos", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1015", "emoji": "⚙️", "name": "Mant billar y juegos", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1016", "emoji": "🚰", "name": "Revisión de sistema de riego", "cat": "Plomería", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1017", "emoji": "⚡", "name": "Mant de motor de puerta eléctrica", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1018", "emoji": "🏗️", "name": "Pasamanos", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1019", "emoji": "🏗️", "name": "Mant motor de gradas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1020", "emoji": "⚡", "name": "Sistema de alarma", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1021", "emoji": "🌿", "name": "Limpieza de mala yerba parqueadero", "cat": "Jardín", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1022", "emoji": "⚙️", "name": "Encender el generador", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1023", "emoji": "🌿", "name": "Limpieza de canal exterior", "cat": "Jardín", "lugar": "", "desc": "", "freq": 21, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1024", "emoji": "⚙️", "name": "Mantenimiento de calefones", "cat": "Equipos", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1025", "emoji": "⚡", "name": "Mantenimiento de parlantes", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1026", "emoji": "🧹", "name": "Limpieza de bodega trasera", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1027", "emoji": "🧹", "name": "Limpieza de bodega delantera", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1028", "emoji": "🌿", "name": "Regar plantas internas", "cat": "Jardín", "lugar": "", "desc": "", "freq": 1, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1029", "emoji": "⚙️", "name": "Mantenimeinto de bicicletas", "cat": "Equipos", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1030", "emoji": "🚰", "name": "Revisión de tuberías de agua", "cat": "Plomería", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1031", "emoji": "🏗️", "name": "Revisión de puertas internas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1032", "emoji": "🏗️", "name": "Mant de techo", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1033", "emoji": "🌿", "name": "Jardin", "cat": "Jardín", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1034", "emoji": "⚡", "name": "Timbres", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1035", "emoji": "🏗️", "name": "Puertas metalicas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1036", "emoji": "🏗️", "name": "Puertas de vidrio", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1037", "emoji": "🏗️", "name": "Limpieza de techo de Pergolas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1038", "emoji": "🏗️", "name": "Sillas de pergolas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1039", "emoji": "⚡", "name": "Amplificador", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1040", "emoji": "🏗️", "name": "Madera", "cat": "Estructura", "lugar": "", "desc": "", "freq": 360, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1041", "emoji": "⚙️", "name": "Cuarto de estudio", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1042", "emoji": "🧹", "name": "Primer piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1043", "emoji": "🧹", "name": "Segundo Piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1044", "emoji": "🧹", "name": "Tercer piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1045", "emoji": "⚡", "name": "Focos", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1046", "emoji": "⚡", "name": "Luminarias", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1047", "emoji": "⚡", "name": "Camaras", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1048", "emoji": "⚙️", "name": "Cuarto de lavadoras", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}];
+var tasks=[], hist=[], control={}, semanal={};
+var _editId=null,_execId=null,_hf='todos';
+var FB_MANT='https://casabecas-8afea-default-rtdb.firebaseio.com/mantenimiento.json';
+
+function saveAll(cb){
+  var data={tasks:tasks,hist:hist,control:control,semanal:semanal};
+  window.fbFetch(FB_MANT,{'method':'PUT','headers':{'Content-Type':'application/json'},'body':JSON.stringify(data)},function(e){
+    if(e){console.error('save error:',e.message);if(cb)cb(e);return;}
+    if(cb)cb(null);
+  });
+}
+
+function loadAll(cb){
+  window.fbFetch(FB_MANT, {}, function(e,d){
+    if(e){if(cb)cb(e);return;}
+    if(d&&d.tasks&&d.tasks.length) tasks=d.tasks;
+    if(d&&d.hist) hist=d.hist||[];
+    if(d&&d.control) control=d.control||{};
+    if(d&&d.semanal) semanal=d.semanal||{};
+    if(cb)cb(null);
+  });
+}
+
+function showScreen(id){
+  document.getElementById('scr-login').style.display='none';
+  document.getElementById('scr-app').style.display='none';
+  document.getElementById(id).style.display=(id==='scr-login'?'flex':'block');
+}
+
+function tryLogin(role, err){
+  if(err) err.textContent='⏳ Cargando...';
+  loadAll(function(e){
+    if(e){if(err)err.textContent='Error de red. Verifica tu conexión.';return;}
+    _role=role;
+    showScreen('scr-app');
+    startApp();
+  });
+}
+function doLogin(){
+  var pi=document.getElementById('pi');
+  var v=pi.value.trim();
+  var dataRole=pi.getAttribute('data-role')||'';
+  var err=document.getElementById('lerr');
+  err.textContent='';
+  if(!v){err.textContent='Ingresa una clave';return;}
+  if(v=== null||v=== null){
+    var role=v=== null?'admin':'oper';
+    err.textContent='⏳ Cargando...';
+    loadAll(function(e){
+      if(e){err.textContent='Error de red. Verifica tu conexión.';return;}
+      _role=role;
+      showScreen('scr-app');
+      startApp();
+    });
+  } else {
+    err.textContent='❌ Clave incorrecta';
+    document.getElementById('pi').value='';
+    document.getElementById('pi').focus();
+    var b=document.getElementById('lbox');
+    b.style.animation='none';
+    setTimeout(function(){b.style.animation='shake .4s ease';},10);
+  }
+}
+
+function startApp(role){
+  if(role) _role=role;
+  var rb=document.getElementById('rbadge');
+  if(_role==='admin'){
+    rb.textContent='🔑 Administrador';rb.className='rbadge rb-a';
+    document.getElementById('btn-xl').style.display='inline-flex';
+    document.getElementById('btn-add').style.display='inline-flex';
+    document.getElementById('btn-xl-hist').style.display='inline-flex';
+    var ba=document.getElementById('btn-audit');if(ba)ba.style.display='inline-flex';
+  } else {
+    rb.textContent='🔧 Operador';rb.className='rbadge rb-o';
+    document.getElementById('btn-xl').style.display='none';
+    document.getElementById('btn-add').style.display='inline-flex';
+    document.getElementById('btn-xl-hist').style.display='none';
+    var ba2=document.getElementById('btn-audit');if(ba2)ba2.style.display='none';
+  }
+  render();
+}
+
+function doLogout(){
+  if(window._fbAuth)window._fbAuth.signOut();
+  _role='';window._appRole='';
+  var em=document.getElementById('auth-email');if(em)em.value='';
+  var pw=document.getElementById('auth-pass');if(pw)pw.value='';
+  var er=document.getElementById('lerr');if(er)er.textContent='';
+  document.getElementById('scr-app').style.display='none';
+  document.getElementById('scr-login').style.display='flex';
+}
+
+// ── STATUS ────────────────────────────────────────────────────────
+function getStatus(t){
+  if(!t.lastDone)return'over';
+  var next=new Date(new Date(t.lastDone).getTime()+t.freq*864e5);
+  var diff=Math.ceil((next-new Date())/864e5);
+  return diff<0?'over':diff<=7?'soon':'ok';
+}
+function getDaysText(t){
+  if(!t.lastDone)return{txt:'Nunca realizado',color:'var(--re)'};
+  var next=new Date(new Date(t.lastDone).getTime()+t.freq*864e5);
+  var diff=Math.ceil((next-new Date())/864e5);
+  if(diff<0)return{txt:'Vencida hace '+Math.abs(diff)+'d',color:'var(--re)'};
+  if(diff===0)return{txt:'Vence hoy',color:'var(--ye)'};
+  return{txt:'Próxima en '+diff+' días',color:'var(--gr)'};
+}
+var FLBL={7:'Semanal',15:'Quincenal',30:'Mensual',60:'Bimestral',90:'Trimestral',180:'Semestral',365:'Anual'};
+var CEMI={Eléctrico:'⚡',Plomería:'🚰',Jardín:'🌿',Limpieza:'🧹',Pintura:'🎨',Estructura:'🏗️',Equipos:'⚙️',Seguridad:'🔒',General:'🔧'};
+
+// ── RENDER ────────────────────────────────────────────────────────
+function render(){
+  var q=document.getElementById('search').value.toLowerCase();
+  var cat=document.getElementById('fcat').value;
+  var fs=document.getElementById('fstatus').value;
+  var fil=tasks.filter(function(t){
+    return(!q||t.name.toLowerCase().includes(q)||(t.lugar||'').toLowerCase().includes(q))&&
+           (!cat||t.cat===cat)&&(!fs||getStatus(t)===fs);
+  });
+  var over=tasks.filter(function(t){return getStatus(t)==='over';}).length;
+  var soon=tasks.filter(function(t){return getStatus(t)==='soon';}).length;
+  document.getElementById('st-tot').textContent=tasks.length;
+  document.getElementById('st-over').textContent=over;
+  document.getElementById('st-soon').textContent=soon;
+  document.getElementById('st-ok').textContent=tasks.length-over-soon;
+  var g=document.getElementById('tasks-grid');
+  if(!fil.length){
+    g.innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:40px">🔧</div><p style="margin-top:10px">'+
+      (tasks.length?'Sin resultados.':(_role==='admin'?'No hay tareas. Usa + Nueva tarea para comenzar.':'No hay tareas registradas aún.'))+
+      '</p></div>';
+    return;
+  }
+  g.innerHTML=fil.map(function(t){
+    var st=getStatus(t);var di=getDaysText(t);
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    var sdClass=st==='over'?'sd-over':st==='soon'?'sd-warn':'sd-ok';
+    var cardClass=st==='over'?'overdue':st==='soon'?'due-soon':'ok';
+    var stTag=t.finalizada?'<span class="tag" style="color:var(--gr);border-color:rgba(56,224,123,.3);background:rgba(56,224,123,.08)">🏁 Finalizada</span>':
+              st==='over'?'<span class="tag tag-over">⚠ VENCIDA</span>':
+              st==='soon'?'<span class="tag tag-soon">⏰ Próxima</span>':
+                          '<span class="tag tag-ok">✅ Al día</span>';
+    var acts='<button class="btn btn-s btn-sm" onclick="openInfo(\''+t.id+'\')">ℹ️ Qué hacer</button> ';
+    if(t.finalizada){
+      acts+='';
+    } else if(t.tipo==='unico' && _role==='admin'){
+      acts+='<button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="openExec(\''+t.id+'\',true)">🏁 Última actividad</button>';
+    } else {
+      acts+='<button class="btn btn-p btn-sm" onclick="openExec(\''+t.id+'\')">✅ Registrar</button>';
+    }
+    if(_role==='admin'){
+      acts+=' <button class="btn btn-y btn-sm" onclick="openEdit(\''+t.id+'\')">✏️ Editar</button>';
+      acts+=' <button class="btn btn-d btn-sm" onclick="delTask(\''+t.id+'\')">🗑</button>';
+    }
+    return'<div class="task-card '+cardClass+'">'+
+      '<div class="tc-head">'+
+        '<div class="tc-icon">'+em+'</div>'+
+        '<div class="tc-info">'+
+          '<div class="tc-name">'+x(t.name)+'</div>'+
+          '<div class="tc-lugar">📍 '+x(t.lugar||'Sin especificar')+'</div>'+
+        '</div>'+
+        '<div class="tc-status"><div class="status-dot '+sdClass+'"></div></div>'+
+      '</div>'+
+      (t.desc?'<div class="tc-desc">'+x(t.desc)+'</div>':'')+
+      '<div class="tc-tags">'+
+        '<span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+
+        '<span class="tag">📂 '+x(t.cat)+'</span>'+
+        stTag+
+        (t.prio?'<span class="tag">'+(t.prio==='alta'?'🔴':t.prio==='media'?'🟡':'🟢')+' '+t.prio+'</span>':'')+
+      '</div>'+
+      (t.responsable?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">👤 <strong>Responsable:</strong> '+x(t.responsable)+'</div>':'')+
+      (t.materiales?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">🧰 '+x(t.materiales)+'</div>':'')+
+      (t.costo?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">💰 $'+t.costo+' est.</div>':'')+
+      '<div class="tc-next">Próxima: <span style="color:'+di.color+'">'+di.txt+'</span></div>'+
+      (t.lastDone?'<div style="font-size:10px;color:var(--mu);margin-bottom:8px;font-family:monospace">Último: '+t.lastDone+(t.lastResp?' · '+x(t.lastResp):'')+'</div>':'')+
+      '<div class="tc-acts">'+acts+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── TASK CRUD ─────────────────────────────────────────────────────
+function openAdd(){
+  _editId=null;
+  document.getElementById('add-title').textContent='+ Nueva tarea de mantenimiento';
+  ['t-em','t-name','t-lugar','t-desc','t-mat','t-resp','t-costo','t-last'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('t-freq').value='30';
+  document.getElementById('t-prio').value='media';
+  document.getElementById('t-cat').value='General';
+  document.getElementById('t-tipo').value='recurrente';
+  openOv('ov-add');
+}
+function openEdit(id){
+  if(_role!=='admin'){toast('Solo el administrador puede editar','err');return;}
+  _editId=id;
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  document.getElementById('add-title').textContent='✏️ Editar tarea';
+  document.getElementById('t-em').value=t.emoji||'';
+  document.getElementById('t-name').value=t.name;
+  document.getElementById('t-cat').value=t.cat;
+  document.getElementById('t-lugar').value=t.lugar||'';
+  document.getElementById('t-desc').value=t.desc||'';
+  document.getElementById('t-freq').value=String(t.freq);
+  document.getElementById('t-prio').value=t.prio||'media';
+  document.getElementById('t-mat').value=t.materiales||'';
+  document.getElementById('t-resp').value=t.responsable||'';
+  document.getElementById('t-costo').value=t.costo||'';
+  document.getElementById('t-last').value=t.lastDone||'';
+  document.getElementById('t-tipo').value=t.tipo||'recurrente';
+  openOv('ov-add');
+}
+function saveTask(){
+  var name=document.getElementById('t-name').value.trim();
+  if(!name){toast('Ingresa el nombre de la tarea','err');return;}
+  var obj={
+    emoji:document.getElementById('t-em').value.trim(),
+    name:name,cat:document.getElementById('t-cat').value,
+    lugar:document.getElementById('t-lugar').value.trim(),
+    desc:document.getElementById('t-desc').value.trim(),
+    freq:parseInt(document.getElementById('t-freq').value),
+    prio:document.getElementById('t-prio').value,
+    materiales:document.getElementById('t-mat').value.trim(),
+    responsable:document.getElementById('t-resp').value.trim(),
+    costo:document.getElementById('t-costo').value,
+    lastDone:document.getElementById('t-last').value,
+    tipo:document.getElementById('t-tipo').value
+  };
+  if(_editId){
+    Object.assign(tasks.find(function(t){return t.id===_editId;}),obj);
+    hist.unshift({tipo:'edit',tarea:name,fecha:now(),detalle:'Editado por admin'});
+  } else {
+    obj.id='t'+Date.now();tasks.push(obj);
+    hist.unshift({tipo:'add',tarea:name,fecha:now(),detalle:'Nueva tarea: '+name+' · '+(FLBL[obj.freq]||obj.freq+'d')});
+  }
+  saveAll(function(){closeOv('ov-add');render();toast('✅ Guardado','ok');});
+}
+function delTask(id){
+  if(!isAdmin()){toast('Solo el administrador puede eliminar tareas','err');return;}
+  if(!confirm('¿Eliminar esta tarea?'))return;
+  tasks=tasks.filter(function(t){return t.id!==id;});
+  saveAll(function(){render();toast('Eliminada','warn');});
+}
+
+// ── INFO (QUÉ HACER) ────────────────────────────────────────────────
+function openInfo(id){
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  var em=t.emoji||(CEMI[t.cat]||'🔧');
+  document.getElementById('info-title').textContent=em+' '+t.name;
+  var di=getDaysText(t);
+  var html='<div class="tc-tags" style="margin-bottom:10px">'+
+      '<span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+
+      '<span class="tag">📂 '+x(t.cat||'')+'</span>'+
+      (t.prio?'<span class="tag">'+(t.prio==='alta'?'🔴':t.prio==='media'?'🟡':'🟢')+' '+t.prio+'</span>':'')+
+    '</div>'+
+    '<div class="fg"><label>📍 Lugar</label><div>'+x(t.lugar||'Sin especificar')+'</div></div>'+
+    (t.desc?'<div class="fg"><label>📝 Descripción de la actividad</label><div>'+x(t.desc)+'</div></div>':'')+
+    (t.materiales?'<div class="fg"><label>🧰 Materiales necesarios</label><div>'+x(t.materiales)+'</div></div>':'')+
+    (t.costo?'<div class="fg"><label>💰 Costo estimado</label><div>$'+x(String(t.costo))+'</div></div>':'')+
+    (t.responsable?'<div class="fg"><label>👤 Responsable</label><div>'+x(t.responsable)+'</div></div>':'')+
+    '<div class="fg"><label>📅 Estado</label><div style="color:'+di.color+'">'+di.txt+'</div></div>'+
+    (t.lastDone?'<div class="fg"><label>🕓 Último registro</label><div>'+t.lastDone+(t.lastResp?' · '+x(t.lastResp):'')+'</div></div>':'');
+  document.getElementById('info-body').innerHTML=html;
+  openOv('ov-info');
+}
+
+// ── EXEC ──────────────────────────────────────────────────────────
+function openExec(id,isLast){
+  _execId=id;
+  window._execIsLast=!!isLast;
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  document.getElementById('exec-title').textContent=(isLast?'🏁 Última actividad — ':'✅ ')+(t.emoji||CEMI[t.cat]||'🔧')+' '+t.name;
+  document.querySelector('#ov-exec h3').textContent=isLast?'🏁 Última actividad (finaliza la tarea)':'✅ Registrar ejecución';
+  document.getElementById('ex-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('ex-resp').value=t.responsable||'';
+  document.getElementById('ex-trabajo').value='';
+  document.getElementById('ex-mat').value=t.materiales||'';
+  document.getElementById('ex-costo').value=t.costo||'';
+  document.getElementById('ex-estado').value='bueno';
+  document.getElementById('ex-obs').value='';
+  openOv('ov-exec');
+}
+function saveExec(){
+  var fecha=document.getElementById('ex-fecha').value;
+  var resp=document.getElementById('ex-resp').value.trim();
+  if(!fecha){toast('Selecciona la fecha','err');return;}
+  if(!resp){toast('Ingresa el responsable','err');return;}
+  var t=tasks.find(function(t){return t.id===_execId;});if(!t)return;
+  var wasLast=!!window._execIsLast;
+  t.lastDone=fecha;t.lastResp=resp;
+  if(wasLast)t.finalizada=true;
+  var entry={
+    tipo:'exec',tarea:t.name,cat:t.cat,lugar:t.lugar,
+    fecha:now(),fechaEjecucion:fecha,responsable:resp,
+    trabajo:document.getElementById('ex-trabajo').value.trim(),
+    materiales:document.getElementById('ex-mat').value.trim(),
+    costo:document.getElementById('ex-costo').value,
+    estado:document.getElementById('ex-estado').value,
+    obs:document.getElementById('ex-obs').value.trim()+(wasLast?' (🏁 Última actividad — tarea finalizada)':'')
+  };
+  hist.unshift(entry);
+  // Auto-update control mensual
+  var mk=fecha.substring(0,7);
+  if(!control[mk])control[mk]={};
+  if(!control[mk][t.id])control[mk][t.id]={done:true,executions:[]};
+  if(!control[mk][t.id].executions)control[mk][t.id].executions=[];
+  control[mk][t.id].done=true;
+  control[mk][t.id].executions.push({fecha:fecha,resp:resp});
+  saveAll(function(){closeOv('ov-exec');render();toast(wasLast?'🏁 Actividad finalizada':'✅ Ejecución registrada','ok');window._execIsLast=false;});
+}
+
+// ── ACTUALIZAR FECHAS EN LOTE ──────────────────────────────────────
+function openFechas(){
+  renderFechas();
+  openOv('ov-fechas');
+}
+function renderFechas(){
+  var el=document.getElementById('fechas-list');
+  if(!tasks.length){
+    el.innerHTML='<div class="empty"><p>No hay tareas.</p></div>';
+    return;
+  }
+  el.innerHTML=tasks.map(function(t,i){
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--bd)">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:600;font-size:13px">'+em+' '+x(t.name)+'</div>'+
+        (t.responsable?'<div style="font-size:11px;color:var(--mu)">👤 '+x(t.responsable)+'</div>':'')+
+      '</div>'+
+      '<input type="date" data-tid="'+t.id+'" class="fecha-input" value="'+(t.lastDone||'')+'" '+
+        'style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:6px 8px;color:var(--tx);font-size:13px">'+
+    '</div>';
+  }).join('');
+}
+function saveFechas(){
+  var inputs=document.querySelectorAll('#fechas-list .fecha-input');
+  var count=0;
+  inputs.forEach(function(inp){
+    var val=inp.value;
+    if(!val)return;
+    var t=tasks.find(function(t){return t.id===inp.getAttribute('data-tid');});
+    if(!t)return;
+    if(t.lastDone!==val){t.lastDone=val;count++;}
+  });
+  if(!count){toast('No hay cambios para guardar','warn');return;}
+  hist.unshift({tipo:'edit',tarea:'Actualización masiva de fechas',fecha:now(),
+    detalle:'Se actualizó la última fecha realizada de '+count+' actividad(es) por '+(_role==='admin'?'el administrador':'el operador')});
+  saveAll(function(){closeOv('ov-fechas');render();toast('✅ '+count+' fecha(s) actualizada(s)','ok');});
+}
+
+// ── CRONOGRAMA DE LA SEMANA ────────────────────────────────────────
+function getWeekKey(d){
+  d=d||new Date();
+  var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=dt.getUTCDay()||7;
+  dt.setUTCDate(dt.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  var weekNo=Math.ceil((((dt-yearStart)/864e5)+1)/7);
+  return dt.getUTCFullYear()+'-W'+String(weekNo).padStart(2,'0');
+}
+function openCronograma(){
+  renderCronograma();
+  openOv('ov-crono');
+}
+function cronogramaList(){
+  var list=tasks.filter(function(t){
+    if(t.finalizada)return false;
+    if(t.freq===7)return true;
+    var next=t.lastDone?new Date(new Date(t.lastDone).getTime()+t.freq*864e5):null;
+    if(!next)return true;
+    var diff=Math.ceil((next-new Date())/864e5);
+    return diff<=7;
+  });
+  list.sort(function(a,b){
+    var oa=getStatus(a)==='over'?0:getStatus(a)==='soon'?1:2;
+    var ob=getStatus(b)==='over'?0:getStatus(b)==='soon'?1:2;
+    return oa-ob;
+  });
+  return list;
+}
+function renderCronograma(){
+  var el=document.getElementById('crono-list');
+  var wk=getWeekKey();
+  if(!semanal[wk])semanal[wk]={};
+  var list=cronogramaList();
+  var doneCount=list.filter(function(t){return !!semanal[wk][t.id];}).length;
+  document.getElementById('crono-cumplimiento').textContent=list.length?
+    '✅ Cumplimiento de la semana: '+doneCount+'/'+list.length+' actividades marcadas':'';
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div style="font-size:36px">🗓️</div><p style="margin-top:8px">No hay actividades semanales ni próximas a vencer esta semana.</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(function(t){
+    var st=getStatus(t);var di=getDaysText(t);
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    var checked=!!semanal[wk][t.id];
+    var stTag=st==='over'?'<span class="tag tag-over">⚠ VENCIDA</span>':
+              st==='soon'?'<span class="tag tag-soon">⏰ Próxima</span>':
+                          '<span class="tag tag-ok">✅ Al día</span>';
+    return '<div class="task-card" style="margin-bottom:10px'+(checked?';opacity:.65':'')+'">'+
+      '<div class="tc-head"><div class="tc-icon">'+em+'</div><div class="tc-info">'+
+        '<div class="tc-name">'+(checked?'<s>':'')+x(t.name)+(checked?'</s>':'')+'</div>'+
+        '<div class="tc-lugar">📍 '+x(t.lugar||'Sin especificar')+'</div>'+
+      '</div></div>'+
+      '<div class="tc-tags"><span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+stTag+'</div>'+
+      (t.responsable?'<div style="font-size:11px;color:var(--mu);margin:6px 0">👤 <strong>Responsable:</strong> '+x(t.responsable)+'</div>':'')+
+      '<div class="tc-next">Próxima: <span style="color:'+di.color+'">'+di.txt+'</span></div>'+
+      '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<button class="btn btn-s btn-sm" onclick="openInfo(\''+t.id+'\')">ℹ️ Qué hacer</button>'+
+        '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx);cursor:pointer">'+
+          '<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCronoCheck(\''+t.id+'\',this.checked)"> Cumplida esta semana'+
+        '</label>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function toggleCronoCheck(id,val){
+  var wk=getWeekKey();
+  if(!semanal[wk])semanal[wk]={};
+  if(val)semanal[wk][id]=true;else delete semanal[wk][id];
+  saveAll(function(){renderCronograma();});
+}
+function downloadCronograma(){
+  var wk=getWeekKey();
+  var list=cronogramaList();
+  var rows=[['Tarea','Categoria','Lugar','Responsable','Frecuencia','Estado','Proxima','Cumplida esta semana']];
+  list.forEach(function(t){
+    var di=getDaysText(t);
+    rows.push([t.name,t.cat||'',t.lugar||'',t.responsable||'',FLBL[t.freq]||t.freq+'d',
+      getStatus(t)==='over'?'Vencida':getStatus(t)==='soon'?'Proxima':'Al dia',
+      di.txt,(semanal[wk]&&semanal[wk][t.id])?'Si':'No']);
+  });
+  var lines=rows.map(function(r){
+    return r.map(function(c){var s=c==null?'':String(c);return '"'+s.split('"').join('""')+'"';}).join(',');
+  });
+  var csv=lines.join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Cronograma_semana_'+wk+'.csv';
+  a.style.display='none';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Descargado','ok');
+}
+
+// ── CONTROL MENSUAL ───────────────────────────────────────────────
+function openControl(){
+  var d=new Date();
+  var mk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var sel=document.getElementById('ctrl-mes-sel');
+  if(sel)sel.value=mk;
+  loadControlMes(mk);
+  openOv('ov-control');
+}
+
+function loadControlMes(mk){
+  if(!mk){var d=new Date();mk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  var parts=mk.split('-');
+  var ml=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var mLabel=ml[parseInt(parts[1])-1]+' '+parts[0];
+  document.getElementById('control-mes').textContent=mLabel;
+  window._ctrlMes=mk;
+  window._ctrlFilter='all';
+  renderControlGrid(mk,'all');
+}
+
+function filterControl(tipo,btn){
+  document.querySelectorAll('#ov-control .btn').forEach(function(b){
+    if(b.id&&b.id.startsWith('ctrl-f-')){
+      b.style.background='var(--s2)';b.style.border='1px solid var(--bd)';b.style.color='var(--tx)';
+    }
+  });
+  if(btn){btn.style.background='var(--ac)';btn.style.color='#fff';btn.style.border='none';}
+  window._ctrlFilter=tipo;
+  renderControlGrid(window._ctrlMes||'',tipo);
+}
+
+function renderControlGrid(mk,filtro){
+  var g=document.getElementById('month-grid');
+  var ctrlMk=control[mk]||{};
+  var filtered=tasks.filter(function(t){
+    var execs=(ctrlMk[t.id]&&ctrlMk[t.id].executions)||[];
+    var isDone=execs.length>0||(ctrlMk[t.id]&&ctrlMk[t.id].done);
+    if(filtro==='done')return isDone;
+    if(filtro==='pend')return !isDone;
+    return true;
+  });
+  if(!filtered.length){
+    g.innerHTML='<div style="color:var(--mu);text-align:center;padding:20px;grid-column:1/-1">Sin tareas para mostrar</div>';
+    return;
+  }
+  g.innerHTML=filtered.map(function(t){
+    var ctrlT=ctrlMk[t.id]||{};
+    var execs=ctrlT.executions||[];
+    // If old format (done:bool), show single check
+    if(execs.length===0&&ctrlT.done){
+      execs=[{fecha:t.lastDone||'—',resp:t.lastResp||''}];
+    }
+    var isDone=execs.length>0;
+    var clr=isDone?'var(--gr)':t.prio==='alta'?'var(--re)':t.prio==='media'?'var(--or)':'var(--bd)';
+    // Build execution checks
+    var checksHtml='';
+    if(execs.length>0){
+      checksHtml='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">';
+      execs.forEach(function(ex){
+        checksHtml+='<div style="display:flex;align-items:center;gap:6px;font-size:12px">'
+          +'<span style="color:var(--gr);font-weight:700">✅</span>'
+          +'<span style="color:var(--tx)">'+ex.fecha+'</span>'
+          +(ex.resp?'<span style="color:var(--mu)">· '+x(ex.resp)+'</span>':'')
+          +'</div>';
+      });
+      checksHtml+='</div>';
+    } else {
+      checksHtml='<div style="margin-top:6px;font-size:12px;color:var(--mu)">⬜ Sin ejecuciones este mes</div>';
+    }
+    return '<div style="border-left:3px solid '+clr+';padding:12px;margin-bottom:8px;background:var(--s);border-radius:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-size:16px">'+(isDone?'✅':'⬜')+'</span>'
+        +'<div style="flex:1">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx)">'+x(t.name)+'</div>'
+          +'<div style="font-size:11px;color:var(--mu)">'+x(t.cat||'')+(t.freq?' · '+t.freq+'d':'')+(t.responsable?' · 👤 '+x(t.responsable):'')+'</div>'
+        +'</div>'
+        +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(isDone?'rgba(56,224,123,.15)':'rgba(122,127,153,.1)')+';color:'+(isDone?'var(--gr)':'var(--mu)')+'">'+execs.length+(execs.length===1?' vez':' veces')+'</span>'
+      +'</div>'
+      +checksHtml
+      +'</div>';
+  }).join('');
+}
+function toggleChk(id){
+  var el=document.getElementById('chk-'+id);
+  var done=!el.classList.contains('checked');
+  el.classList.toggle('checked',done);el.textContent=done?'✓':'';
+}
+function saveControl(){
+  var selEl=document.getElementById('ctrl-mes-sel');
+  var mk=selEl&&selEl.value?selEl.value:(new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'));
+  var parts=mk.split('-');
+  var ml=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][parseInt(parts[1])-1]+' '+parts[0];
+  if(!control[mk])control[mk]={};
+  var done=0;
+  tasks.forEach(function(t){
+    var chk=document.getElementById('chk-'+t.id);
+    var obs=(document.getElementById('obs-'+t.id)||{}).value||'';
+    var isDone=chk&&chk.classList.contains('checked');
+    control[mk][t.id]={done:isDone,obs:obs};
+    if(isDone)done++;
+  });
+  hist.unshift({tipo:'control',tarea:'Control mensual',fecha:now(),mes:ml,
+    detalle:'Control '+ml+': '+done+'/'+tasks.length+' tareas completadas',
+    completadas:done,total:tasks.length});
+  saveAll(function(){closeOv('ov-control');toast('📅 Control guardado · '+done+'/'+tasks.length+' completadas','ok');});
+}
+
+// ── HISTORIAL ─────────────────────────────────────────────────────
+function openHist(){renderHist();openOv('ov-hist');}
+function fh(f,btn){
+  _hf=f;
+  document.querySelectorAll('#hchips .chip').forEach(function(c){c.classList.remove('on');});
+  btn.classList.add('on');renderHist();
+}
+function renderHist(){
+  var list=document.getElementById('hlist');
+  var q=(document.getElementById('hist-search')||{value:''}).value.toLowerCase().trim();
+  var mes=(document.getElementById('hist-fecha')||{value:''}).value;
+  var fil=hist.filter(function(h){
+    if(_hf!=='todos'&&h.tipo!==_hf)return false;
+    if(mes&&h.fecha&&h.fecha.substring(0,7)!==mes)return false;
+    if(q){
+      var haystack=(h.tarea||'')+(h.detalle||'')+(h.responsable||'')+(h.lugar||'')+(h.trabajo||'');
+      if(haystack.toLowerCase().indexOf(q)<0)return false;
+    }
+    return true;
+  });
+  if(!fil.length){
+    list.innerHTML='<div class="empty"><div style="font-size:36px">📋</div><p>'+(q||mes?'Sin resultados para esta búsqueda':'Sin registros aún')+'</p></div>';
+    return;
+  }
+  var lbl={exec:'✅ Ejecución',control:'📅 Control',add:'➕ Nueva',edit:'✏️ Edición'};
+  var bc={exec:'hb-done',control:'hb-pend',add:'hb-add',edit:'hb-edit'};
+  list.innerHTML=fil.map(function(h){
+    return'<div class="hi">'+
+      '<div class="hi-head">'+
+        '<span class="hbadge '+(bc[h.tipo]||'hb-add')+'">'+(lbl[h.tipo]||h.tipo)+'</span>'+
+        '<span class="hi-name">'+x(h.tarea||'—')+'</span>'+
+        '<span style="font-size:11px;color:var(--mu);font-family:monospace">'+h.fecha+'</span>'+
+      '</div>'+
+      '<div class="hi-rows">'+
+        '<div class="hi-f" style="grid-column:1/-1"><strong>📝 Detalle</strong>'+x(h.detalle||'')+'</div>'+
+        (h.fechaEjecucion?'<div class="hi-f"><strong>📅 Ejecución</strong>'+h.fechaEjecucion+'</div>':'')+
+        (h.responsable?'<div class="hi-f"><strong>👤 Responsable</strong>'+x(h.responsable)+'</div>':'')+
+        (h.lugar?'<div class="hi-f"><strong>📍 Lugar</strong>'+x(h.lugar)+'</div>':'')+
+        (h.trabajo?'<div class="hi-f" style="grid-column:1/-1"><strong>🔨 Trabajo</strong>'+x(h.trabajo)+'</div>':'')+
+        (h.materiales?'<div class="hi-f"><strong>🧰 Materiales</strong>'+x(h.materiales)+'</div>':'')+
+        (h.costo?'<div class="hi-f"><strong>💰 Costo</strong>$'+h.costo+'</div>':'')+
+        (h.estado?'<div class="hi-f"><strong>⭐ Estado</strong>'+h.estado+'</div>':'')+
+        (h.obs?'<div class="hi-f" style="grid-column:1/-1"><strong>💬 Obs.</strong>'+x(h.obs)+'</div>':'')+
+        (h.mes?'<div class="hi-f"><strong>📅 Mes</strong>'+h.mes+'</div>':'')+
+        (h.completadas!==undefined?'<div class="hi-f"><strong>✅ Completadas</strong>'+h.completadas+'/'+h.total+'</div>':'')+
+      '</div></div>';
+  }).join('');
+}
+
+// ── EXCEL ─────────────────────────────────────────────────────────
+function exportXL(){
+  if(_role!=='admin'){toast('Solo el administrador','err');return;}
+  var rows=[['Tipo','Tarea','Categoria','Lugar','Fecha registro','Fecha ejecucion','Responsable','Trabajo','Materiales','Costo','Estado','Observaciones','Mes','Completadas']];
+  hist.forEach(function(h){
+    rows.push([h.tipo,h.tarea||'',h.cat||'',h.lugar||'',h.fecha||'',h.fechaEjecucion||'',
+      h.responsable||'',h.trabajo||'',h.materiales||'',h.costo||'',h.estado||'',
+      h.obs||h.detalle||'',h.mes||'',h.completadas!==undefined?h.completadas+'/'+h.total:'']);
+  });
+  var lines=[];
+  rows.forEach(function(r){
+    var cols=r.map(function(c){
+      var s=c==null?'':String(c);
+      return '"'+s.split('"').join('""')+'"';
+    }).join(',');
+    lines.push(cols);
+  });
+  var csv=lines.join('\r\n');
+  var bom='\uFEFF';
+  var blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Mantenimiento_'+new Date().toLocaleDateString('es-EC').split('/').join('-')+'.csv';
+  a.style.display='none';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Descargado','ok');
+}
+// ── UTILS ─────────────────────────────────────────────────────────
+function x(s){var t=s||'';return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function now(){return new Date().toLocaleString('es-EC',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';setTimeout(function(){t.classList.remove('show');},3000);}
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+
+// ── EVENT LISTENERS (no inline onclick for critical buttons) ──────
+document.addEventListener('DOMContentLoaded', function(){
+  
+
+  document.getElementById('auth-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doAuthLogin();});
+  document.getElementById('btn-logout').addEventListener('click',function(){fbLogout(function(){window._fbAuth.signOut();window._appRole='';_role='';showScreen('scr-login');document.getElementById('auth-email').value='';document.getElementById('auth-pass').value='';});});
+  document.getElementById('btn-add').addEventListener('click', openAdd);
+  document.getElementById('btn-control').addEventListener('click', openControl);
+  document.getElementById('btn-hist').addEventListener('click', openHist);
+  document.getElementById('btn-xl').addEventListener('click', exportXL);
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('fcat').addEventListener('change', render);
+  document.getElementById('fstatus').addEventListener('change', render);
+  document.querySelectorAll('.ov').forEach(function(o){
+    o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});
+  });
+});
+
+// Firebase auth token helper for secure DB requests
+function fbFetch(url, options, cb){
+  var user = window._fbAuth ? window._fbAuth.currentUser : null;
+  function doReq(token){
+    var authUrl = url + (url.includes('?') ? '&' : '?') + (token ? 'auth='+token : '_=1');
+    fetch(authUrl, options||{})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){ cb(null, d); })
+      .catch(function(e){ cb(e, null); });
+  }
+  if(user){ user.getIdToken().then(doReq).catch(function(){ doReq(null); }); }
+  else { doReq(null); }
+}
+
+function doAuthLogin(){
+  var email=document.getElementById('auth-email').value.trim();
+  var pass=document.getElementById('auth-pass').value;
+  var err=document.getElementById('lerr');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Completa correo y contraseña';return;}
+  err.textContent='Verificando...';
+  window._fbAuth.signInWithEmailAndPassword(email,pass)
+    .then(function(cred){
+      var role=window._ROLES[cred.user.uid];
+      if(!role){window._fbAuth.signOut();err.textContent='Sin permiso de acceso';return;}
+      window._appRole=role;
+      _role=role;
+      loadAll(function(e){
+        if(e){err.textContent='Error: '+e.message;return;}
+        document.getElementById('scr-login').style.display='none';
+        document.getElementById('scr-app').style.display='block';
+        startApp(role);
+      });
+    })
+    .catch(function(e){
+      err.textContent='❌ '+(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Correo o contraseña incorrectos':e.message);
+    });
+}
+
+function openAudit(){
+  var list=document.getElementById('audit-list');
+  if(!list)return;
+  var entries=hist.filter(function(h){return h.tipo!=='control';});
+  if(!entries.length){
+    list.innerHTML='<div style="color:var(--mu);text-align:center;padding:20px">Sin registros de auditoría</div>';
+  } else {
+    var lbl={exec:'✅ Ejecución',add:'➕ Nueva tarea',edit:'✏️ Edición',del:'🗑 Eliminación'};
+    list.innerHTML=entries.map(function(h){
+      return '<div style="background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-weight:700;color:var(--ac)">'+(lbl[h.tipo]||h.tipo||'—')+'</span>'
+        +'<span style="color:var(--mu);font-family:monospace">'+h.fecha+'</span></div>'
+        +'<div style="font-weight:600">'+x(h.tarea||h.detalle||'')+'</div>'
+        +(h.quien?'<div style="color:var(--mu)">👤 '+x(h.quien)+'</div>':'')
+        +(h.detalle&&h.tarea?'<div style="color:var(--mu)">'+x(h.detalle)+'</div>':'')
+        +'</div>';
+    }).join('');
+  }
+  openOv('ov-audit');
+}
+
+function exportControl(){
+  var mes=document.getElementById('ctrl-mes-sel').value||
+    (new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'));
+  var rows=[['Tarea','Categoría','Frecuencia','Responsable','Lugar','Estado','Completada']];
+  tasks.forEach(function(t){
+    rows.push([
+      t.name||'',t.cat||'',
+      (t.freq?t.freq+'d ('+({'7':'Semanal','15':'Quincenal','30':'Mensual','60':'Bimestral','90':'Trimestral','180':'Semestral','365':'Anual'}[String(t.freq)]||t.freq+'d')+')':''),
+      t.responsable||t.resp||'',t.lugar||'',
+      getStatus(t)==='over'?'Vencida':getStatus(t)==='soon'?'Próxima':'Al día',
+      t.done?'Sí':'No'
+    ]);
+  });
+  var csv=rows.map(function(r){
+    return r.map(function(c){
+      var s=String(c==null?'':c);
+      return '"'+s.replace(/"/g,'""')+'"';
+    }).join(',');
+  }).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='Control_'+mes+'.csv';
+  a.style.display='none';document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('✅ Descargado','ok');
+}
+
+// Global exports
+window.isAdmin=isAdmin;
+window.isOper=isOper;
+window.auditEntry=auditEntry;
+window.saveAll=saveAll;
+window.loadAll=loadAll;
+window.showScreen=showScreen;
+window.tryLogin=tryLogin;
+window.doLogin=doLogin;
+window.startApp=startApp;
+window.doLogout=doLogout;
+window.getStatus=getStatus;
+window.getDaysText=getDaysText;
+window.render=render;
+window.openAdd=openAdd;
+window.openEdit=openEdit;
+window.saveTask=saveTask;
+window.delTask=delTask;
+window.openExec=openExec;
+window.openInfo=openInfo;
+window.saveExec=saveExec;
+window.openControl=openControl;
+window.openFechas=openFechas;
+window.renderFechas=renderFechas;
+window.saveFechas=saveFechas;
+window.openCronograma=openCronograma;
+window.renderCronograma=renderCronograma;
+window.toggleCronoCheck=toggleCronoCheck;
+window.downloadCronograma=downloadCronograma;
+window.getWeekKey=getWeekKey;
+window.loadControlMes=loadControlMes;
+window.filterControl=filterControl;
+window.renderControlGrid=renderControlGrid;
+window.toggleChk=toggleChk;
+window.saveControl=saveControl;
+window.openHist=openHist;
+window.fh=fh;
+window.renderHist=renderHist;
+window.exportXL=exportXL;
+window.x=x;
+window.now=now;
+window.toast=toast;
+window.openOv=openOv;
+window.closeOv=closeOv;
+window.fbFetch=fbFetch;
+window.doAuthLogin=doAuthLogin;
+window.openAudit=openAudit;
+window.exportControl=exportControl;
+</script>
+</body>
+</html>
