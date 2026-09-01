@@ -175,6 +175,7 @@ main{padding:22px 18px;max-width:1200px;margin:0 auto;}
       <div class="rbadge rb-a" id="rbadge">🔑</div>
       <button id="btn-hist" class="btn btn-sm btn-s" onclick="openHist()">📋 Historial</button>
       <button id="btn-ctrl" class="btn btn-sm btn-s" onclick="openControl()">📅 Control</button>
+      <button id="btn-hoy" class="btn btn-sm btn-s" onclick="openHoy()">📌 Hoy</button>
       <button id="btn-crono" class="btn btn-sm btn-s" onclick="openCronograma()">🗓️ Cronograma de la semana</button>
       <button id="btn-fechas" class="btn btn-sm btn-s" onclick="openFechas()">🕓 Actualizar fechas</button>
       <button id="btn-audit" class="btn btn-sm btn-s" style="display:none" onclick="openAudit()">📊 Auditoría</button>
@@ -321,6 +322,7 @@ main{padding:22px 18px;max-width:1200px;margin:0 auto;}
       <button class="btn btn-sm" id="ctrl-f-all" onclick="filterControl('all',this)" style="background:var(--ac);color:#fff;border:none">Todas</button>
       <button class="btn btn-sm" id="ctrl-f-done" onclick="filterControl('done',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">✅ Ejecutadas</button>
       <button class="btn btn-sm" id="ctrl-f-pend" onclick="filterControl('pend',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">⏳ Pendientes</button>
+      <button class="btn btn-sm" id="ctrl-f-over" onclick="filterControl('over',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">⚠️ Vencidas</button>
     </div>
   </div>
   <p class="msub" id="control-mes">Mes actual</p>
@@ -380,6 +382,23 @@ main{padding:22px 18px;max-width:1200px;margin:0 auto;}
   <div class="mf" style="margin-top:10px">
     <button class="btn-gh" onclick="closeOv('ov-hist')">Cerrar</button>
     <button id="btn-xl-hist" class="btn" style="background:var(--gr);color:#000" onclick="exportXL()">📊 Exportar Excel</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: HOY -->
+<div class="ov" id="ov-hoy">
+<div class="modal modal-lg">
+  <h3>📌 Resumen de hoy</h3>
+  <p class="msub" id="hoy-fecha">—</p>
+  <div class="section-title">✅ Hechas hoy</div>
+  <div id="hoy-hechas" style="margin-bottom:18px"></div>
+  <div class="section-title">⚠️ Vencidas (no hechas)</div>
+  <div id="hoy-vencidas" style="margin-bottom:18px"></div>
+  <div class="section-title">⏰ Vencen hoy (no hechas)</div>
+  <div id="hoy-vencenhoy"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-hoy')">Cerrar</button>
   </div>
 </div>
 </div>
@@ -854,6 +873,49 @@ function downloadCronograma(){
   toast('Descargado','ok');
 }
 
+// ── RESUMEN DE HOY ─────────────────────────────────────────────────
+function openHoy(){
+  renderHoy();
+  openOv('ov-hoy');
+}
+function renderHoy(){
+  var d=new Date();
+  var todayStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var mk=todayStr.substring(0,7);
+  var ml=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('hoy-fecha').textContent=d.getDate()+' de '+ml[d.getMonth()]+' de '+d.getFullYear();
+  var ctrlMk=control[mk]||{};
+  var hechas=[],vencidas=[],vencenHoy=[];
+  tasks.forEach(function(t){
+    if(t.finalizada)return;
+    var execs=(ctrlMk[t.id]&&ctrlMk[t.id].executions)||[];
+    var doneToday=execs.some(function(e){return e.fecha===todayStr;})||(t.lastDone===todayStr);
+    if(doneToday){hechas.push(t);return;}
+    var st=getStatus(t);
+    var di=getDaysText(t);
+    if(st==='over'){vencidas.push(t);}
+    else if(di.txt==='Vence hoy'){vencenHoy.push(t);}
+  });
+  function row(t,extra,clr){
+    var em=t.emoji||CEMI[t.cat]||'🔧';
+    return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:9px 12px;margin-bottom:6px">'
+      +'<span style="font-size:18px">'+em+'</span>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+x(t.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--mu)">'+x(t.cat||'')+(t.responsable?' · 👤 '+x(t.responsable):'')+'</div></div>'
+      +(extra?'<span style="font-size:11px;font-weight:700;color:'+(clr||'var(--mu)')+'">'+extra+'</span>':'')
+      +'</div>';
+  }
+  var hHtml=hechas.length?hechas.map(function(t){return row(t,'✅ Hecha','var(--gr)');}).join(''):
+    '<div style="color:var(--mu);font-size:12px;padding:6px 0">Ninguna tarea registrada hoy todavía.</div>';
+  document.getElementById('hoy-hechas').innerHTML=hHtml;
+  var vHtml=vencidas.length?vencidas.map(function(t){var di=getDaysText(t);return row(t,di.txt,'var(--re)');}).join(''):
+    '<div style="color:var(--mu);font-size:12px;padding:6px 0">No hay tareas vencidas 🎉</div>';
+  document.getElementById('hoy-vencidas').innerHTML=vHtml;
+  var vhHtml=vencenHoy.length?vencenHoy.map(function(t){return row(t,'⏰ Hoy','var(--ye)');}).join(''):
+    '<div style="color:var(--mu);font-size:12px;padding:6px 0">No hay tareas que venzan hoy.</div>';
+  document.getElementById('hoy-vencenhoy').innerHTML=vhHtml;
+}
+
 // ── CONTROL MENSUAL ───────────────────────────────────────────────
 function openControl(){
   var d=new Date();
@@ -894,6 +956,7 @@ function renderControlGrid(mk,filtro){
     var isDone=execs.length>0||(ctrlMk[t.id]&&ctrlMk[t.id].done);
     if(filtro==='done')return isDone;
     if(filtro==='pend')return !isDone;
+    if(filtro==='over')return !isDone&&getStatus(t)==='over';
     return true;
   });
   if(!filtered.length){
@@ -908,7 +971,9 @@ function renderControlGrid(mk,filtro){
       execs=[{fecha:t.lastDone||'—',resp:t.lastResp||''}];
     }
     var isDone=execs.length>0;
-    var clr=isDone?'var(--gr)':t.prio==='alta'?'var(--re)':t.prio==='media'?'var(--or)':'var(--bd)';
+    var st=getStatus(t);
+    var clr=isDone?'var(--gr)':st==='over'?'var(--re)':st==='soon'?'var(--ye)':'var(--bd)';
+    var vencidaTag=(!isDone&&st==='over')?'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(255,71,87,.12);color:var(--re);margin-left:6px">⚠️ VENCIDA</span>':'';
     // Build execution checks
     var checksHtml='';
     if(execs.length>0){
@@ -928,7 +993,7 @@ function renderControlGrid(mk,filtro){
       +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span style="font-size:16px">'+(isDone?'✅':'⬜')+'</span>'
         +'<div style="flex:1">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--tx)">'+x(t.name)+'</div>'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx)">'+x(t.name)+vencidaTag+'</div>'
           +'<div style="font-size:11px;color:var(--mu)">'+x(t.cat||'')+(t.freq?' · '+t.freq+'d':'')+(t.responsable?' · 👤 '+x(t.responsable):'')+'</div>'
         +'</div>'
         +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(isDone?'rgba(56,224,123,.15)':'rgba(122,127,153,.1)')+';color:'+(isDone?'var(--gr)':'var(--mu)')+'">'+execs.length+(execs.length===1?' vez':' veces')+'</span>'
@@ -1176,6 +1241,8 @@ window.delTask=delTask;
 window.openExec=openExec;
 window.openInfo=openInfo;
 window.saveExec=saveExec;
+window.openHoy=openHoy;
+window.renderHoy=renderHoy;
 window.openControl=openControl;
 window.openFechas=openFechas;
 window.renderFechas=renderFechas;
