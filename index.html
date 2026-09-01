@@ -1,831 +1,1070 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<script>
-(function() {
-          function _pw(a){return a.map(function(c){return String.fromCharCode(c);}).join('');}
-
-  // Restore session
-  var savedRole = '';
-  try {
-    if(sessionStorage.getItem(_ka)==='1') savedRole='admin';
-    else if(sessionStorage.getItem(_ko)==='1') savedRole='oper';
-  } catch(e){}
-
-  if(savedRole){
-    window._bodegaRole = savedRole;
-    document.addEventListener('DOMContentLoaded', function() {
-      var s = document.getElementById('login-screen');
-      if(s) s.style.display = 'none';
-      if(typeof loadFromFirebase === 'function'){
-        loadFromFirebase(function(){ if(typeof render === 'function') render(); });
-      }
-    });
-  }
-
-  function doLoginRole(role){
-    window._bodegaRole = role;
-    try{
-      sessionStorage.setItem(role==='admin'?_ka:_ko,'1');
-      sessionStorage.removeItem(role==='admin'?_ko:_ka);
-    }catch(e){}
-    var s = document.getElementById('login-screen');
-    if(s) s.style.display = 'none';
-    var err = document.getElementById('login-err');
-    if(err) err.textContent = '';
-    document.getElementById('pwd-input').value = '';
-    if(typeof loadFromFirebase === 'function'){
-      loadFromFirebase(function(){ if(typeof render === 'function') render(); });
-    }
-  }
-
-  window.doLoginAdmin = function(){
-    var v = document.getElementById('pwd-input').value;
-    var err = document.getElementById('login-err');
-    var box = document.getElementById('login-box');
-    if(v === _pw(_pa)){ doLoginRole('admin'); }
-    else{
-      if(err) err.textContent = '❌ Clave de administrador incorrecta';
-      document.getElementById('pwd-input').value = '';
-      if(box){box.classList.remove('login-shake');void box.offsetWidth;box.classList.add('login-shake');}
-    }
-  };
-
-  window.doLoginOper = function(){
-    var v = document.getElementById('pwd-input').value;
-    var err = document.getElementById('login-err');
-    var box = document.getElementById('login-box');
-    if(v === _pw(_po)){ doLoginRole('oper'); }
-    else{
-      if(err) err.textContent = '❌ Clave de operador incorrecta';
-      document.getElementById('pwd-input').value = '';
-      if(box){box.classList.remove('login-shake');void box.offsetWidth;box.classList.add('login-shake');}
-    }
-  };
-
-  window.toggleEye = function(){
-    var inp = document.getElementById('pwd-input');
-    var btn = document.getElementById('eye-btn');
-    if(!inp) return;
-    if(inp.type==='password'){inp.type='text';if(btn)btn.textContent='🙈';}
-    else{inp.type='password';if(btn)btn.textContent='👁️';}
-  };
-})();
-
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bodega · Inventario</title>
+<title>Mantenimiento · CasaBecas</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-:root{--bg:#0f1117;--s:#1a1d27;--s2:#22263a;--bd:#2e3350;--ac:#6c63ff;--ac2:#ff6584;--gr:#38e07b;--ye:#ffd166;--re:#ff4757;--tx:#e8eaf0;--mu:#7a7f99;--r:14px;--f:'Space Grotesk',sans-serif;--m:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh;}
-header{background:var(--s);border-bottom:1px solid var(--bd);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap;}
-.logo{font-size:17px;font-weight:700;letter-spacing:-.5px;}
-.logo span{color:var(--ac);}
-main{padding:22px 18px;max-width:1300px;margin:0 auto;}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
-.stat{background:var(--s);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;}
-.stat .n{font-family:var(--m);font-size:22px;font-weight:500;margin-bottom:2px;}
-.stat .l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;}
-.n.ac{color:var(--ac);}.n.gr{color:var(--gr);}.n.ye{color:var(--ye);}.n.re{color:var(--re);}
-.alert-bar{background:linear-gradient(135deg,#2a1f3d,#1f2a3d);border:1px solid var(--ac2);border-radius:var(--r);padding:13px 16px;margin-bottom:16px;display:none;gap:10px;align-items:flex-start;}
-.alert-bar.show{display:flex;}
-.atags{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;}
-.atag{background:rgba(255,101,132,.15);border:1px solid rgba(255,101,132,.3);color:var(--ac2);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;}
-.controls{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-.inp{flex:1;min-width:140px;background:var(--s);border:1px solid var(--bd);border-radius:9px;padding:8px 13px;color:var(--tx);font-family:var(--f);font-size:13px;outline:none;transition:border-color .2s;}
-.inp:focus{border-color:var(--ac);}
-select.inp{cursor:pointer;max-width:185px;}
-.btn{padding:8px 16px;border:none;border-radius:9px;font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;}
-.btn-p{background:var(--ac);color:#fff;}.btn-p:hover{background:#5a52d5;transform:translateY(-1px);}
-.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px;}
+*,*::before,*::after{box-sizing:border-box;}
+
+body{background:var(--bg);color:var(--tx);font-family:'Space Grotesk',sans-serif;margin:0;}
+:root{--bg:#f3f4fa;--s:#ffffff;--s2:#eceefa;--bd:#dde1f0;--ac:#6c63ff;--gr:#16a34a;--ye:#b45309;--re:#dc2626;--or:#ea580c;--tx:#1c1f2b;--mu:#6b7280;}
+.screen{display:none;}
+.screen.active{display:block;}
+/* LOGIN */
+#scr-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.lbox{background:var(--s);border:1px solid var(--bd);border-radius:20px;padding:36px 32px;width:100%;max-width:360px;text-align:center;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.lbox.shake{animation:shake .4s ease;}
+.ll{font-size:42px;margin-bottom:10px;}
+.lt{font-size:20px;font-weight:700;margin-bottom:4px;}.lt span{color:var(--ac);}
+.ls{font-size:13px;color:var(--mu);margin-bottom:20px;}
+.lf{position:relative;margin-bottom:12px;}
+.lf input{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 44px 12px 16px;color:var(--tx);font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;letter-spacing:0;}
+.lf input:focus{border-color:var(--ac);}
+.lf input::placeholder{letter-spacing:0;}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;}
+.lbtn{width:100%;background:var(--ac);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.lbtn:hover{background:#5a52d5;}
+.lerr{color:var(--re);font-size:12px;margin-top:10px;min-height:18px;font-weight:500;}
+.lfoot{font-size:11px;color:#9aa0b8;margin-top:20px;}
+/* APP */
+header{background:var(--s);border-bottom:1px solid var(--bd);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+.logo{font-size:16px;font-weight:700;}.logo span{color:var(--ac);}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.rbadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.rb-a{background:rgba(108,99,255,.2);color:var(--ac);border:1px solid rgba(108,99,255,.4);}
+.rb-o{background:rgba(255,159,67,.15);color:var(--or);border:1px solid rgba(255,159,67,.3);}
+main{padding:22px 18px;max-width:1200px;margin:0 auto;}
+/* BUTTONS */
+.btn{padding:8px 16px;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;}
+.btn-p{background:var(--ac);color:#fff;}.btn-p:hover{background:#5a52d5;}
+.btn-g{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
+.btn-y{background:rgba(180,83,9,.12);color:var(--ye);border:1px solid rgba(180,83,9,.3);}
 .btn-d{background:rgba(255,71,87,.1);color:var(--re);border:1px solid rgba(255,71,87,.2);}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;}
-.card{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);padding:14px;transition:transform .18s,box-shadow .18s;}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,.3);}
-.card.low{border-color:rgba(255,71,87,.4);}
-.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
-.em{font-size:24px;}
-.dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0;}
-.dot.ok{background:var(--gr);box-shadow:0 0 5px var(--gr);}
-.dot.low{background:var(--re);box-shadow:0 0 5px var(--re);animation:pu 1.5s infinite;}
-.dot.med{background:var(--ye);box-shadow:0 0 5px var(--ye);}
-.dot.txt{background:var(--ac);box-shadow:0 0 5px var(--ac);}
-@keyframes pu{0%,100%{opacity:1;}50%{opacity:.35;}}
-.cn{font-size:13px;font-weight:600;margin-bottom:2px;line-height:1.3;}
-.cm{font-size:10px;color:var(--mu);font-family:var(--m);margin-bottom:9px;line-height:1.7;}
-.sr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.sl{font-size:11px;color:var(--mu);}
-.sn{font-family:var(--m);font-size:16px;font-weight:500;}
-.sn.ok{color:var(--gr);}.sn.low{color:var(--re);}.sn.med{color:var(--ye);}.sn.txt{color:var(--ac);}
-.pb{height:3px;background:var(--bd);border-radius:4px;overflow:hidden;margin-bottom:9px;}
-.pf{height:100%;border-radius:4px;transition:width .4s;}
-.pf.ok{background:var(--gr);}.pf.low{background:var(--re);}.pf.med{background:var(--ye);}.pf.txt{background:var(--ac);}
-.ca{display:flex;gap:4px;align-items:center;}
-.qb{width:25px;height:25px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-weight:700;}
-.qb:hover{border-color:var(--ac);color:var(--ac);}
-.lbadge{background:rgba(255,71,87,.12);color:var(--re);font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.4px;}
-
-/* ── HISTORIAL ── */
-.hist-modal{max-width:680px;}
-.hist-filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.hist-chip{padding:5px 13px;border:1px solid var(--bd);background:var(--s2);color:var(--mu);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
-.hist-chip.active{border-color:var(--ac);background:rgba(108,99,255,.15);color:var(--ac);}
-.hist-list{max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-.hist-item{background:var(--bg);border:1px solid var(--bd);border-radius:11px;padding:13px 15px;}
-.hist-item-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
-.hist-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.4px;white-space:nowrap;}
-.hb-compra{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
-.hb-uso{background:rgba(108,99,255,.15);color:var(--ac);border:1px solid rgba(108,99,255,.3);}
-.hb-venta{background:rgba(255,209,102,.15);color:var(--ye);border:1px solid rgba(255,209,102,.3);}
-.hb-devolucion{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
-.hb-alquiler{background:rgba(255,159,67,.15);color:var(--or);border:1px solid rgba(255,159,67,.3);}
-.hb-reposicion{background:rgba(108,99,255,.15);color:var(--ac);border:1px solid rgba(108,99,255,.3);}
-.hist-item-name{font-size:13px;font-weight:700;flex:1;}
-.hist-delta{font-family:var(--m);font-size:14px;font-weight:600;}
-.hist-delta.pos{color:var(--gr);}.hist-delta.neg{color:var(--re);}
-.hist-rows{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.hist-field{font-size:11px;color:var(--mu);}
-.hist-field strong{display:block;color:var(--tx);font-size:12px;font-weight:600;}
-.hist-obs{margin-top:8px;font-size:11px;color:var(--mu);background:rgba(255,255,255,.03);border-radius:7px;padding:7px 10px;border-left:2px solid var(--bd);}
-.hist-empty{text-align:center;padding:40px 20px;color:var(--mu);}
-
+.btn-s{background:var(--s2);color:var(--mu);border:1px solid var(--bd);}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px;}
+.btn-gh{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:8px 16px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer;}
+.btn-gh:hover{border-color:var(--tx);color:var(--tx);}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.stat{background:var(--s);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;text-align:center;}
+.stat .n{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;margin-bottom:2px;}
+.stat .l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;}
+.c-ac{color:var(--ac);}.c-gr{color:var(--gr);}.c-ye{color:var(--ye);}.c-re{color:var(--re);}
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.inp{background:var(--s);border:1px solid var(--bd);border-radius:9px;padding:8px 13px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;}
+.inp:focus{border-color:var(--ac);}
+.chip{padding:5px 13px;border:1px solid var(--bd);background:var(--s2);color:var(--mu);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.chip.on{border-color:var(--ac);background:rgba(108,99,255,.15);color:var(--ac);}
+/* TASK CARDS */
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.task-card{background:var(--s);border:1px solid var(--bd);border-radius:14px;padding:16px;transition:transform .18s,box-shadow .18s;}
+.task-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(30,34,60,.10);}
+.task-card.overdue{border-color:rgba(255,71,87,.45);}
+.task-card.due-soon{border-color:rgba(180,83,9,.4);}
+.task-card.ok{border-color:rgba(56,224,123,.25);}
+.tc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.tc-icon{font-size:28px;flex-shrink:0;}
+.tc-info{flex:1;}
+.tc-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.tc-lugar{font-size:11px;color:var(--mu);font-family:'DM Mono',monospace;}
+.tc-status{margin-left:auto;flex-shrink:0;}
+.status-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;}
+.sd-ok{background:var(--gr);box-shadow:0 0 6px var(--gr);}
+.sd-warn{background:var(--ye);box-shadow:0 0 6px var(--ye);animation:pu 1.5s infinite;}
+.sd-over{background:var(--re);box-shadow:0 0 6px var(--re);animation:pu 1s infinite;}
+@keyframes pu{0%,100%{opacity:1;}50%{opacity:.3;}}
+.tc-desc{font-size:12px;color:var(--mu);margin-bottom:10px;line-height:1.5;}
+.tc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--s2);color:var(--mu);border:1px solid var(--bd);}
+.tag-freq{color:var(--ac);border-color:rgba(108,99,255,.3);background:rgba(108,99,255,.08);}
+.tag-over{color:var(--re);border-color:rgba(255,71,87,.3);background:rgba(255,71,87,.08);}
+.tag-soon{color:var(--ye);border-color:rgba(180,83,9,.3);background:rgba(180,83,9,.08);}
+.tag-ok{color:var(--gr);border-color:rgba(56,224,123,.3);background:rgba(56,224,123,.08);}
+.tc-next{font-size:11px;color:var(--mu);margin-bottom:10px;}
+.tc-next span{font-weight:600;color:var(--tx);}
+.tc-acts{display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--bd);padding-top:10px;margin-top:2px;}
 /* MODAL */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
 .ov.open{display:flex;}
-.modal{background:var(--s);border:1px solid var(--bd);border-radius:18px;padding:22px;width:100%;max-width:480px;animation:su .22s ease;max-height:92vh;overflow-y:auto;}
-@keyframes su{from{transform:translateY(18px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal h3{font-size:16px;margin-bottom:16px;}
+.modal{background:var(--s);border:1px solid var(--bd);border-radius:18px;padding:24px;width:100%;max-width:580px;margin:auto;animation:msu .2s ease;}
+.modal-lg{max-width:720px;}
+@keyframes msu{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal h3{font-size:16px;margin-bottom:6px;}
+.msub{font-size:12px;color:var(--mu);margin-bottom:18px;}
 .fg{margin-bottom:12px;}
 .fg label{display:block;font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
-.fg input,.fg select,.fg textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;color:var(--tx);font-family:var(--f);font-size:13px;outline:none;transition:border-color .2s;resize:vertical;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color .2s;resize:vertical;}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--ac);}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.mf{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
-.btn-gh{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:8px 16px;border-radius:8px;font-family:var(--f);font-size:13px;cursor:pointer;transition:all .2s;}
-.btn-gh:hover{border-color:var(--tx);color:var(--tx);}
-.tx-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:9px;margin-bottom:14px;}
-.tx-tab{flex:1;padding:7px;border:none;border-radius:6px;font-family:var(--f);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s;}
-.tx-tab.active{background:var(--ac);color:#fff;}
-.log-list{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-.log-item{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;}
-.log-item .lt{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.ltype{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
-.ltype.compra{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
-.ltype.uso{background:rgba(108,99,255,.15);color:var(--ac);border:1px solid rgba(108,99,255,.3);}
-.ltype.venta{background:rgba(255,209,102,.15);color:var(--ye);border:1px solid rgba(255,209,102,.3);}
-.ldelta{font-family:var(--m);font-size:14px;font-weight:500;}
-.ldelta.pos{color:var(--gr);}.ldelta.neg{color:var(--re);}
-.ldesc{font-size:12px;color:var(--mu);margin-bottom:2px;}
-.ldate{font-size:10px;color:var(--bd);font-family:var(--m);}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:12px 17px;font-size:13px;font-weight:500;z-index:999;transform:translateY(70px);opacity:0;transition:all .28s;max-width:290px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.mf{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;}
+.mdiv{height:1px;background:var(--bd);margin:16px 0;}
+/* CONTROL MENSUAL */
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px;}
+.month-item{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
+.mi-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.mi-emoji{font-size:20px;}
+.mi-name{font-size:13px;font-weight:600;flex:1;}
+.mi-done{width:20px;height:20px;border-radius:6px;border:2px solid var(--bd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .2s;}
+.mi-done.checked{background:var(--gr);border-color:var(--gr);color:#000;}
+.mi-obs textarea{width:100%;background:var(--s);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;resize:none;margin-top:6px;}
+.mi-obs textarea:focus{border-color:var(--ac);}
+/* HISTORIAL */
+.hist-list{max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.hi{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
+.hi-head{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+.hbadge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.hb-done{background:rgba(56,224,123,.15);color:var(--gr);border:1px solid rgba(56,224,123,.3);}
+.hb-pend{background:rgba(180,83,9,.12);color:var(--ye);border:1px solid rgba(180,83,9,.3);}
+.hb-add{background:rgba(108,99,255,.15);color:var(--ac);border:1px solid rgba(108,99,255,.3);}
+.hb-edit{background:rgba(255,159,67,.15);color:var(--or);border:1px solid rgba(255,159,67,.3);}
+.hi-name{font-size:13px;font-weight:700;flex:1;}
+.hi-rows{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;}
+.hi-f{color:var(--mu);}.hi-f strong{display:block;color:var(--tx);font-size:12px;font-weight:600;}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:12px 17px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .28s;max-width:300px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.ok{border-color:var(--gr);}.toast.warn{border-color:var(--ye);}.toast.err{border-color:var(--re);}
-.empty{text-align:center;padding:40px 20px;color:var(--mu);grid-column:1/-1;}
-.empty .ei{font-size:36px;margin-bottom:8px;}
-@media(max-width:600px){.stats{grid-template-columns:1fr 1fr;}.fr{grid-template-columns:1fr;}.fr3{grid-template-columns:1fr;}}
-
-
-/* ── LOGIN ── */
-#login-screen{position:fixed;inset:0;background:#0f1117;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
-.login-box{background:#1a1d27;border:1px solid #2e3350;border-radius:20px;padding:36px 32px;width:100%;max-width:360px;text-align:center;}
-.login-logo{font-size:42px;margin-bottom:12px;}
-.login-title{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;}
-.login-title span{color:#6c63ff;}
-.login-sub{font-size:13px;color:#7a7f99;margin-bottom:28px;}
-.login-field{position:relative;margin-bottom:14px;}
-.login-field input{width:100%;background:#0f1117;border:1px solid #2e3350;border-radius:10px;padding:12px 44px 12px 16px;color:#e8eaf0;font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s;letter-spacing:2px;}
-.login-field input:focus{border-color:#6c63ff;}
-.login-field input::placeholder{letter-spacing:0;}
-.eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:#7a7f99;cursor:pointer;font-size:16px;padding:4px;}
-.login-btn{width:100%;background:#6c63ff;color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;}
-.login-btn:hover{background:#5a52d5;}
-.login-err{color:#ff4757;font-size:13px;margin-top:12px;min-height:20px;font-weight:500;}
-.login-footer{font-size:11px;color:#3a3f5a;margin-top:24px;}
-.login-shake{animation:shake .4s ease;}
-@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
-
-.bov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
-.bov.open{display:flex}
-.bmodal{background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:16px;padding:24px;width:100%;max-width:600px;margin:auto}
-.binp{width:100%;background:var(--bg,#0f1117);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:9px 12px;color:var(--tx,#e8eaf0);font-family:inherit;font-size:13px;outline:none;box-sizing:border-box}
-.blbl{font-size:10px;font-weight:700;color:var(--mu,#7a7f99);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.bbtn-ac{background:var(--ac,#6c63ff);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
-.bbtn-ghost{background:transparent;color:var(--mu,#7a7f99);border:1px solid var(--bd,#2e3350);border-radius:9px;padding:9px 18px;font-family:inherit;font-size:13px;cursor:pointer}
-@media(max-width:600px){#grid{grid-template-columns:1fr}[style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr 1fr!important}}
-
+.empty{text-align:center;padding:40px 20px;color:var(--mu);}
+.section-title{font-size:14px;font-weight:700;color:var(--mu);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--bd);}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr;}.r2{grid-template-columns:1fr;}.r3{grid-template-columns:1fr;}}
 </style>
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- Firebase Auth SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script>
-  (function(){
-    var _cfg={apiKey:"AIzaSyDnciWUp7T2grbtOVp7gvdlBUA8i2LiplI",authDomain:"casabecas-8afea.firebaseapp.com",databaseURL:"https://casabecas-8afea-default-rtdb.firebaseio.com",projectId:"casabecas-8afea"};
-    if(!firebase.apps.length) firebase.initializeApp(_cfg);
-    window._fbAuth = firebase.auth();
-    window._fbDb   = firebase.database();
-    window._ROLES  = {'s51EqDX0m9hWmo9C4Hy00dFqD0C3':'admin','pNOVupR7DzPdEmQl9cOPN3JzJdH3':'oper'};
-    window.fbFetch = function(url,opts,cb){
-      var u=window._fbAuth.currentUser;
-      function go(tok){
-        var sep=url.indexOf('?')>=0?'&':'?';
-        var u2=tok?url+sep+'auth='+tok:url;
-        fetch(u2,opts||{}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){cb(null,d);}).catch(function(e){cb(e,null);});
-      }
-      if(u){u.getIdToken(false).then(go).catch(function(){go(null);});}else{go(null);}
-    };
-  })();
-  </script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  var c={apiKey:"AIzaSyDnciWUp7T2grbtOVp7gvdlBUA8i2LiplI",authDomain:"casabecas-8afea.firebaseapp.com",databaseURL:"https://casabecas-8afea-default-rtdb.firebaseio.com",projectId:"casabecas-8afea"};
+  if(!firebase.apps.length)firebase.initializeApp(c);
+  window._fbAuth=firebase.auth();
+  window._fbDb=firebase.database();
+  window._ROLES={'s51EqDX0m9hWmo9C4Hy00dFqD0C3':'admin','pNOVupR7DzPdEmQl9cOPN3JzJdH3':'oper'};
+})();
+</script>
 </head>
 <body>
 
-
-<div id="login-screen">
-  <div class="login-box" id="login-box">
-    <div class="login-logo">📦</div>
-    <div class="login-title"><span>Bodega · Inventario</span></div>
-    <div class="login-sub">Ingresa con tu cuenta de CasaBecas</div>
-    <div style="margin-bottom:10px;width:100%">
-      <input type="email" id="auth-email" placeholder="Correo electrónico"
-        autocomplete="email"
-        onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()"
-        style="width:100%;background:var(--bg,#0f1117);border:1px solid #2e3350;border-radius:10px;padding:12px 14px;color:#e8eaf0;font-size:14px;font-family:inherit;outline:none;letter-spacing:0;margin-bottom:8px;display:block">
-      <div style="position:relative">
-        <input type="password" id="auth-pass" placeholder="Contraseña"
-          autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doAuthLogin()"
-          style="width:100%;background:var(--bg,#0f1117);border:1px solid #2e3350;border-radius:10px;padding:12px 44px 12px 14px;color:#e8eaf0;font-size:14px;font-family:inherit;outline:none">
-        <button onclick="var i=document.getElementById('auth-pass');i.type=i.type==='password'?'text':'password'" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#7a7f99;cursor:pointer;font-size:16px">👁️</button>
-      </div>
+<!-- LOGIN -->
+<div id="scr-login">
+  <div class="lbox" id="lbox">
+    <div class="ll">🔧</div>
+    <div class="lt"><span>Mantenimiento</span></div>
+    <div class="ls">CasaBecas · Acceso al sistema</div>
+    <div class="lf" style="margin-bottom:8px">
+      <input type="email" id="auth-email" placeholder="Correo electrónico" autocomplete="email" style="width:100%" onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
     </div>
-    <button class="login-btn" onclick="doAuthLogin()">🔐 Ingresar</button>
-    <div class="login-err" id="login-err"></div>
-    <div style="font-size:11px;color:#3a3f5a;margin-top:14px">CasaBecas · Acceso seguro</div>
+    <div class="lf">
+      <input type="password" id="auth-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuthLogin()">
+      <button class="eye" onclick="var i=document.getElementById('auth-pass');i.type=i.type==='password'?'text':'password'">👁️</button>
+    </div>
+    <button class="lbtn" onclick="doAuthLogin()">🔐 Ingresar</button>
+    <div class="lerr" id="lerr"></div>
+    <div class="lfoot">CasaHub · Sistema privado</div>
   </div>
 </div>
-
 
 <!-- APP -->
-<div id="app-wrap" style="display:none">
-  <div style="background:var(--s,#1a1d27);border-bottom:1px solid var(--bd,#2e3350);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100">
-    <div style="font-size:15px;font-weight:700">📦 <span style="color:var(--ac,#6c63ff)">Bodega</span> · Inventario</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <span id="rbadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(108,99,255,.2);color:var(--ac,#6c63ff);border:1px solid rgba(108,99,255,.4)"></span>
-      <button id="btn-add-item" style="display:none;background:var(--ac,#6c63ff);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">+ Agregar</button>
-      <button onclick="openHist()" style="background:rgba(56,224,123,.15);color:#38e07b;border:1px solid rgba(56,224,123,.3);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">📋 Historial</button>
-      <button onclick="openAudit()" style="background:var(--s2,#22263a);color:var(--tx,#e8eaf0);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;cursor:pointer">📊 Auditoría</button>
-      <button onclick="abrirReporte()" style="background:var(--s2,#22263a);color:var(--tx,#e8eaf0);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;cursor:pointer">📅 Reporte</button>
-      <button onclick="doLogout()" style="background:var(--s2,#22263a);color:var(--mu,#7a7f99);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;cursor:pointer">Salir</button>
+<div id="scr-app" style="display:none">
+  <header>
+    <div class="logo">🔧 <span>Mantenimiento</span></div>
+    <div class="hacts">
+      <div class="rbadge rb-a" id="rbadge">🔑</div>
+      <button id="btn-hist" class="btn btn-sm btn-s" onclick="openHist()">📋 Historial</button>
+      <button id="btn-ctrl" class="btn btn-sm btn-s" onclick="openControl()">📅 Control</button>
+      <button id="btn-crono" class="btn btn-sm btn-s" onclick="openCronograma()">🗓️ Cronograma de la semana</button>
+      <button id="btn-fechas" class="btn btn-sm btn-s" onclick="openFechas()">🕓 Actualizar fechas</button>
+      <button id="btn-audit" class="btn btn-sm btn-s" style="display:none" onclick="openAudit()">📊 Auditoría</button>
+      <button id="btn-xl" class="btn btn-sm" style="display:none;background:var(--gr);color:#000" onclick="exportXL()">📊 Excel</button>
+      <button id="btn-add" class="btn btn-p btn-sm" style="display:none" onclick="openAdd(null)">+ Nueva tarea</button>
+      <button id="btn-logout" class="btn btn-sm btn-s" onclick="doLogout()">⏻ Salir</button>
     </div>
-  </div>
-  <div id="alert-bar" style="display:none;background:#1a0a0a;border-bottom:2px solid #ff4757;padding:8px 16px;font-size:12px;color:#ff6b7a"><span id="alert-tags"></span></div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 16px 0">
-    <div style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:12px;padding:14px;text-align:center"><div id="s-total" style="font-size:22px;font-weight:700;color:var(--ac,#6c63ff)">0</div><div style="font-size:10px;color:var(--mu,#7a7f99);text-transform:uppercase">Artículos</div></div>
-    <div style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:12px;padding:14px;text-align:center"><div id="s-ok" style="font-size:22px;font-weight:700;color:#38e07b">0</div><div style="font-size:10px;color:var(--mu,#7a7f99);text-transform:uppercase">OK</div></div>
-    <div style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:12px;padding:14px;text-align:center"><div id="s-low" style="font-size:22px;font-weight:700;color:#ffd166">0</div><div style="font-size:10px;color:var(--mu,#7a7f99);text-transform:uppercase">Bajo</div></div>
-    <div style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:12px;padding:14px;text-align:center"><div id="s-med" style="font-size:22px;font-weight:700;color:#ff9f43">0</div><div style="font-size:10px;color:var(--mu,#7a7f99);text-transform:uppercase">Agotando</div></div>
-  </div>
-  <div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap">
-    <input type="text" id="search" placeholder="Buscar artículo..." oninput="render()" style="flex:1;min-width:140px;background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:8px 12px;color:var(--tx,#e8eaf0);font-size:13px;font-family:inherit;outline:none">
-    <select id="cat-f" onchange="render()" style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:8px 10px;color:var(--tx,#e8eaf0);font-size:13px;font-family:inherit;outline:none"><option value="">Todas las categorías</option></select>
-    <select id="stock-f" onchange="render()" style="background:var(--s,#1a1d27);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:8px 10px;color:var(--tx,#e8eaf0);font-size:13px;font-family:inherit;outline:none"><option value="">Todo el stock</option><option value="ok">✅ OK</option><option value="low">🟡 Bajo</option><option value="out">🔴 Sin stock</option></select>
-  </div>
-  <div id="grid" style="padding:0 16px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
-</div>
-
-<!-- MODAL AGREGAR/EDITAR -->
-<div class="bov" id="ov-add"><div class="bmodal" style="max-width:480px;max-height:90vh;overflow-y:auto">
-  <h3 id="add-title" style="margin-bottom:14px;font-size:15px">➕ Agregar artículo</h3>
-  <div style="font-size:11px;font-weight:700;color:var(--ac,#6c63ff);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd,#2e3350)">Información del artículo</div>
-  <div style="display:grid;grid-template-columns:60px 1fr;gap:10px;margin-bottom:10px">
-    <div><div class="blbl">Emoji</div><input id="f-em" placeholder="📦" maxlength="2" class="binp"></div>
-    <div><div class="blbl">Nombre *</div><input id="f-name" placeholder="Nombre del artículo" class="binp"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-    <div><div class="blbl">Categoría *</div><input id="f-cat" placeholder="Ej: Limpieza" class="binp"></div>
-    <div><div class="blbl">Marca</div><input id="f-marca" placeholder="Ej: Olimpia" class="binp"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-    <div><div class="blbl">Ubicación</div><input id="f-ubic" placeholder="Ej: Est.1 Niv.2" class="binp"></div>
-    <div><div class="blbl">Color</div><input id="f-color" placeholder="Ej: blanco" class="binp"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-    <div><div class="blbl">Cantidad</div><input type="number" id="f-qty" placeholder="0" min="0" class="binp"></div>
-    <div><div class="blbl">Mínimo</div><input type="number" id="f-min" placeholder="1" min="0" class="binp"></div>
-    <div><div class="blbl">Máximo</div><input type="number" id="f-max" placeholder="10" min="0" class="binp"></div>
-  </div>
-  <div id="f-compra-section">
-    <div style="font-size:11px;font-weight:700;color:var(--gr,#38e07b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd,#2e3350)">Datos de compra inicial</div>
-    <div style="margin-bottom:10px"><div class="blbl">Fecha de compra</div><input type="date" id="f-fecha-compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Proveedor</div><input id="f-proveedor" placeholder="Nombre del proveedor" class="binp" style="margin-top:4px"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div><div class="blbl">Dirección proveedor</div><input id="f-dir-proveedor" placeholder="Dirección" class="binp" style="margin-top:4px"></div>
-      <div><div class="blbl">Teléfono proveedor</div><input id="f-tel-proveedor" placeholder="Teléfono" class="binp" style="margin-top:4px"></div>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="stat"><div class="n c-ac" id="st-tot">0</div><div class="l">Total tareas</div></div>
+      <div class="stat"><div class="n c-re" id="st-over">0</div><div class="l">Vencidas</div></div>
+      <div class="stat"><div class="n c-gr" id="st-soon">0</div><div class="l">Próximas</div></div>
+      <div class="stat"><div class="n c-or" id="st-ok">0</div><div class="l">Al día</div></div>
     </div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién compró</div><input id="f-quien-compro" placeholder="Nombre de quien realizó la compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Para qué se compró</div><input id="f-para-que" placeholder="Propósito de la compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién solicitó</div><input id="f-quien-solicito" placeholder="Nombre de quien solicitó" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:14px"><div class="blbl">Observaciones</div><textarea id="f-obs" placeholder="Observaciones generales" class="binp" rows="2" style="margin-top:4px;resize:none"></textarea></div>
-  </div>
-  <div style="display:flex;justify-content:flex-end;gap:8px">
-    <button onclick="closeBov('ov-add')" class="bbtn-ghost">Cancelar</button>
-    <button onclick="saveItem()" class="bbtn-ac">💾 Guardar</button>
-  </div>
-</div></div>
-
-<!-- MODAL MOVIMIENTO -->
-<div class="ov" id="ov-tx">
-<div class="bmodal" style="max-width:460px;max-height:90vh;overflow-y:auto">
-  <h3 id="tx-title" style="margin-bottom:16px;font-size:15px">Movimiento</h3>
-  
-  <!-- COMPRA FIELDS -->
-  <div id="tx-compra-fields">
-    <div style="margin-bottom:10px"><div class="blbl">Fecha de compra *</div><input type="date" id="tx-fecha-compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Cantidad *</div><input type="text" id="tx-qty-compra" placeholder="Ej: 5 unidades, 3 mts" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Proveedor *</div><input type="text" id="tx-proveedor" placeholder="Nombre del proveedor" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Dirección proveedor</div><input type="text" id="tx-dir-proveedor" placeholder="Dirección" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Teléfono proveedor</div><input type="text" id="tx-tel-proveedor" placeholder="Teléfono" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién compró *</div><input type="text" id="tx-quien-compro" placeholder="Nombre de quien realizó la compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Para qué se compró *</div><input type="text" id="tx-para-que-compra" placeholder="Propósito de la compra" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién solicitó</div><input type="text" id="tx-quien-solicito-compra" placeholder="Nombre de quien solicitó" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Observaciones</div><textarea id="tx-obs-compra" placeholder="Observaciones generales" class="binp" rows="2" style="margin-top:4px;resize:none"></textarea></div>
-  </div>
-
-  <!-- USO FIELDS -->
-  <div id="tx-uso-fields" style="display:none">
-    <div style="margin-bottom:10px"><div class="blbl">Fecha de uso *</div><input type="date" id="tx-fecha-uso" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Cantidad *</div><input type="text" id="tx-qty-uso" placeholder="Ej: 2 unidades, 1 mt" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién solicita *</div><input type="text" id="tx-quien-solicita" placeholder="Nombre de quien solicita" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Para qué se utiliza *</div><input type="text" id="tx-para-que-uso" placeholder="Propósito del uso" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Observaciones</div><textarea id="tx-obs-uso" placeholder="Observaciones generales" class="binp" rows="2" style="margin-top:4px;resize:none"></textarea></div>
-  </div>
-
-  <!-- TOMA FISICA FIELDS -->
-  <div id="tx-fisica-fields" style="display:none">
-    <div style="margin-bottom:10px"><div class="blbl">Fecha de la toma *</div><input type="date" id="tx-fecha-fisica" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Cantidad física contada *</div><input type="text" id="tx-qty-fisica" placeholder="Cantidad real encontrada en bodega" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Quién realizó la toma</div><input type="text" id="tx-quien-fisica" placeholder="Nombre de quien contó" class="binp" style="margin-top:4px"></div>
-    <div style="margin-bottom:10px"><div class="blbl">Observaciones</div><textarea id="tx-obs-fisica" placeholder="Ej: falta 1 unidad, posible préstamo no registrado" class="binp" rows="2" style="margin-top:4px;resize:none"></textarea></div>
-  </div>
-
-  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
-    <button onclick="closeBov('ov-tx')" class="bbtn-ghost">Cancelar</button>
-    <button onclick="saveTxNew()" class="bbtn-ac">✅ Confirmar</button>
-  </div>
+    <div class="filters">
+      <input id="search" type="text" placeholder="Buscar tarea..." oninput="render()" style="flex:1;min-width:160px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;color:var(--tx);font-size:13px">
+      <select id="fcat" onchange="render()" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;color:var(--tx);font-size:13px">
+        <option value="">Todas las categorías</option>
+        <option>Limpieza</option><option>Reparación</option><option>Inspección</option>
+        <option>Jardinería</option><option>Eléctrico</option><option>Plomería</option><option>Otro</option>
+      </select>
+      <select id="fstatus" onchange="render()" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;color:var(--tx);font-size:13px">
+        <option value="">Todos los estados</option>
+        <option value="ok">✅ Al día</option>
+        <option value="soon">⏰ Próximas</option>
+        <option value="over">⚠️ Vencidas</option>
+      </select>
+    </div>
+    <div id="tasks-grid"></div>
+  </main>
 </div>
-</div>/div>
-
-<!-- MODAL HISTORIAL -->
-<div class="bov" id="ov-hist"><div class="bmodal" style="max-width:680px">
-  <h3 id="log-title" style="margin-bottom:14px;font-size:15px">📋 Historial de movimientos</h3>
-  <div id="hist-list" style="max-height:420px;overflow-y:auto"></div>
-  <div id="log-list" style="max-height:420px;overflow-y:auto"></div>
-  <div style="display:flex;justify-content:flex-end;margin-top:14px">
-    <button onclick="closeBov('ov-hist')" class="bbtn-ghost">Cerrar</button>
-  </div>
-</div></div>
-
-<!-- MODAL LOG ITEM -->
-<div class="bov" id="ov-log"><div class="bmodal" style="max-width:580px;max-height:90vh">
-  <h3 id="log-title" style="margin-bottom:14px;font-size:15px">📦 Historial del artículo</h3>
-  <div id="log-list" style="max-height:65vh;overflow-y:auto"></div>
-  <div style="display:flex;justify-content:flex-end;margin-top:14px">
-    <button onclick="closeBov('ov-log')" class="bbtn-ghost">Cerrar</button>
-  </div>
-</div></div>
 
 <div class="toast" id="toast"></div>
 
+<!-- MODAL: AGREGAR/EDITAR TAREA -->
+<div class="ov" id="ov-add">
+<div class="modal">
+  <h3 id="add-title">➕ Nueva tarea</h3>
+  <div class="r2">
+    <div class="fg"><label>Emoji</label><input id="t-em" placeholder="🔧" style="font-size:20px;text-align:center;width:80px"></div>
+    <div class="fg"><label>Nombre de la tarea *</label><input id="t-name" placeholder="Ej: Revisar instalación eléctrica"></div>
+  </div>
+  <div class="r2">
+    <div class="fg"><label>Categoría</label>
+      <select id="t-cat">
+        <option value="General">General</option>
+        <option value="Limpieza">Limpieza</option><option value="Reparación">Reparación</option>
+        <option value="Inspección">Inspección</option><option value="Jardinería">Jardinería</option>
+        <option value="Eléctrico">Eléctrico</option><option value="Plomería">Plomería</option><option value="Pintura">Pintura</option><option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="fg"><label>Prioridad</label>
+      <select id="t-prio">
+        <option value="media">🟠 Media</option>
+        <option value="alta">🔴 Alta</option>
+        <option value="baja">🟢 Baja</option>
+      </select>
+    </div>
+  </div>
+  <div class="r2">
+    <div class="fg"><label>Frecuencia (días)</label>
+      <select id="t-freq">
+        <option value="7">Semanal (7d)</option>
+        <option value="15">Quincenal (15d)</option>
+        <option value="30" selected>Mensual (30d)</option>
+        <option value="60">Bimestral (60d)</option>
+        <option value="90">Trimestral (90d)</option>
+        <option value="180">Semestral (180d)</option>
+        <option value="365">Anual (365d)</option>
+      </select>
+    </div>
+    <div class="fg"><label>Responsable</label><input id="t-resp" placeholder="Nombre o empresa"></div>
+  </div>
+  <div class="fg"><label>Tipo de actividad</label>
+    <select id="t-tipo">
+      <option value="recurrente" selected>🔄 Recurrente (según frecuencia)</option>
+      <option value="unico">🏁 Un solo uso (se finaliza tras registrarla)</option>
+    </select>
+  </div>
+  <div class="fg"><label>Lugar</label><input id="t-lugar" placeholder="Cocina, baño, jardín..."></div>
+  <div class="fg"><label>Descripción</label><textarea id="t-desc" rows="2" placeholder="Detalles de la tarea..."></textarea></div>
+  <div class="r2">
+    <div class="fg"><label>Materiales estimados</label><input id="t-mat" placeholder="Lista de materiales..."></div>
+    <div class="fg"><label>Costo estimado ($)</label><input type="number" id="t-costo" placeholder="0.00" min="0" step="0.01"></div>
+  </div>
+  <div class="fg"><label>Último mantenimiento realizado</label><input type="date" id="t-last"></div>
+  <input type="hidden" id="t-id">
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-add')">Cancelar</button>
+    <button class="btn btn-p" onclick="saveTask()">💾 Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: INFO DE LA ACTIVIDAD -->
+<div class="ov" id="ov-info">
+<div class="modal">
+  <h3 id="info-title">ℹ️ Detalle de la actividad</h3>
+  <div id="info-body"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-info')">Cerrar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: REGISTRAR EJECUCION -->
+<div class="ov" id="ov-exec">
+<div class="modal">
+  <h3>✅ Registrar ejecución</h3>
+  <div class="fg"><label>Tarea</label><div id="exec-title" style="font-weight:600;padding:8px;background:var(--bg);border-radius:8px;font-size:14px"></div></div>
+  <div class="r2">
+    <div class="fg"><label>Fecha de ejecución *</label><input type="date" id="ex-fecha"></div>
+    <div class="fg"><label>Responsable</label><input id="ex-resp" placeholder="Quién realizó..."></div>
+  </div>
+  <div class="fg"><label>Trabajo realizado</label><textarea id="ex-trabajo" rows="2" placeholder="Describe lo que se hizo..."></textarea></div>
+  <div class="r2">
+    <div class="fg"><label>Materiales usados</label><input id="ex-mat" placeholder="Lista de materiales..."></div>
+    <div class="fg"><label>Costo ($)</label><input type="number" id="ex-costo" placeholder="0.00" min="0" step="0.01"></div>
+  </div>
+  <div class="fg"><label>Estado resultado</label>
+    <select id="ex-estado">
+      <option value="Completado">✅ Completado</option>
+      <option value="Parcial">⚠️ Parcial</option>
+      <option value="Requiere revisión">🔄 Requiere revisión</option>
+    </select>
+  </div>
+  <div class="fg"><label>Observaciones</label><textarea id="ex-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+  <input type="hidden" id="exec-tid">
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-exec')">Cancelar</button>
+    <button class="btn btn-p" onclick="saveExec()">✅ Registrar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: CONTROL MENSUAL -->
+<div class="ov" id="ov-control">
+<div class="modal modal-lg">
+  <h3>📅 Control mensual de mantenimiento</h3>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <input id="ctrl-mes-sel" type="month" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px" onchange="loadControlMes(this.value)">
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" id="ctrl-f-all" onclick="filterControl('all',this)" style="background:var(--ac);color:#fff;border:none">Todas</button>
+      <button class="btn btn-sm" id="ctrl-f-done" onclick="filterControl('done',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">✅ Ejecutadas</button>
+      <button class="btn btn-sm" id="ctrl-f-pend" onclick="filterControl('pend',this)" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx)">⏳ Pendientes</button>
+    </div>
+  </div>
+  <p class="msub" id="control-mes">Mes actual</p>
+  <div class="month-grid" id="month-grid"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-control')">Cerrar</button>
+    <button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="exportControl()">📊 Descargar Excel</button>
+    <button class="btn btn-p" onclick="saveControl()">💾 Guardar control</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: ACTUALIZAR FECHAS EN LOTE -->
+<div class="ov" id="ov-fechas">
+<div class="modal modal-lg">
+  <h3>🕓 Actualizar última fecha realizada</h3>
+  <p class="msub">Ingresa la última fecha en que se hizo cada actividad y guarda todo de una sola vez</p>
+  <div id="fechas-list" style="max-height:55vh;overflow-y:auto;margin-top:10px"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-fechas')">Cerrar</button>
+    <button class="btn btn-p" onclick="saveFechas()">💾 Guardar todas las fechas</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: CRONOGRAMA DE LA SEMANA -->
+<div class="ov" id="ov-crono">
+<div class="modal modal-lg">
+  <h3>🗓️ Cronograma de la semana</h3>
+  <p class="msub">Tareas semanales y actividades que vencen en los próximos 7 días</p>
+  <p id="crono-cumplimiento" style="font-size:13px;font-weight:600;color:var(--ac);margin:6px 0 4px"></p>
+  <div id="crono-list" style="margin-top:10px"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-crono')">Cerrar</button>
+    <button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="downloadCronograma()">📥 Descargar cronograma</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: HISTORIAL -->
+<div class="ov" id="ov-hist">
+<div class="modal modal-lg">
+  <h3 style="margin-bottom:8px">📋 Historial de mantenimiento</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <input id="hist-search" type="text" placeholder="Buscar por tarea, detalle, responsable..." style="flex:1;min-width:180px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;color:var(--tx);font-size:13px" oninput="renderHist()">
+    <input id="hist-fecha" type="month" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px" onchange="renderHist()">
+    <button class="btn btn-sm btn-s" onclick="document.getElementById('hist-search').value='';document.getElementById('hist-fecha').value='';renderHist()">✕ Limpiar</button>
+  </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px" id="hchips">
+    <button class="chip on" onclick="fh('todos',this)">Todos</button>
+    <button class="chip" onclick="fh('exec',this)">✅ Ejecuciones</button>
+    <button class="chip" onclick="fh('control',this)">📅 Control</button>
+    <button class="chip" onclick="fh('add',this)">➕ Altas</button>
+    <button class="chip" onclick="fh('edit',this)">✏️ Ediciones</button>
+  </div>
+  <div id="hlist" style="max-height:55vh;overflow-y:auto"></div>
+  <div class="mf" style="margin-top:10px">
+    <button class="btn-gh" onclick="closeOv('ov-hist')">Cerrar</button>
+    <button id="btn-xl-hist" class="btn" style="background:var(--gr);color:#000" onclick="exportXL()">📊 Exportar Excel</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: AUDITORÍA -->
+<div class="ov" id="ov-audit">
+<div class="modal modal-lg">
+  <h3>📊 Auditoría del sistema</h3>
+  <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Registro de todas las acciones realizadas</p>
+  <div id="audit-list" style="max-height:60vh;overflow-y:auto"></div>
+  <div class="mf">
+    <button class="btn-gh" onclick="closeOv('ov-audit')">Cerrar</button>
+  </div>
+</div>
+</div>
+
 <script>
-const SEED = [{"id": 1, "emoji": "🎨", "name": "Anticorrosivo (blanco)", "cat": "Pintura", "marca": "condor", "color": "blanco", "ubicacion": "Est.3 Niv.2", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 2, "emoji": "🎨", "name": "Anticorrosivo (mate)", "cat": "Pintura", "marca": "pinturas unidas", "color": "mate", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 3, "emoji": "🎨", "name": "Anticorrosivo (gris)", "cat": "Pintura", "marca": "pin3", "color": "gris", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 4, "emoji": "🎨", "name": "Sellador de madera", "cat": "Pintura", "marca": "condor", "color": "", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 5, "emoji": "🎨", "name": "Barniz (transparente)", "cat": "Pintura", "marca": "condor", "color": "transparente", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 6, "emoji": "🎨", "name": "Anticorrosivo (negro mate)", "cat": "Pintura", "marca": "condor", "color": "negro mate", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 7, "emoji": "🎨", "name": "Impermeabilizante de ladrillo (negro)", "cat": "Pintura", "marca": "condor", "color": "negro", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 8, "emoji": "🎨", "name": "Pinturas acrílicas (semi mate, plomo)", "cat": "Pintura", "marca": "wesco", "color": "semi mate, plomo", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 9, "emoji": "🎨", "name": "Aerosol (azul)", "cat": "Pintura", "marca": "evans", "color": "azul", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 10, "emoji": "🎨", "name": "Aerosol (blanco brillante)", "cat": "Pintura", "marca": "naxo", "color": "blanco brillante", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 11, "emoji": "🎨", "name": "Aerosol (blanco)", "cat": "Pintura", "marca": "abro", "color": "blanco", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 12, "emoji": "⛽", "name": "Gasolina", "cat": "Combustible", "marca": "", "color": "", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 13, "emoji": "🧴", "name": "Cloro", "cat": "Aseo", "marca": "tips", "color": "", "ubicacion": "Est.3 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 14, "emoji": "🔧", "name": "Silicona", "cat": "Adhesivos", "marca": "abro", "color": "", "ubicacion": "Est.3 Niv.4", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 15, "emoji": "🛢️", "name": "Grasa de litio sintética", "cat": "Lubricantes", "marca": "abro", "color": "", "ubicacion": "Est.3 Niv.4", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 16, "emoji": "🏗️", "name": "Empaste", "cat": "Construcción", "marca": "aditec", "color": "", "ubicacion": "Est.3 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 17, "emoji": "🔧", "name": "Cola (blanca)", "cat": "Adhesivos", "marca": "bioplast", "color": "blanca", "ubicacion": "Est.3 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 18, "emoji": "🛢️", "name": "Aceite de motor 2 tiempos", "cat": "Lubricantes", "marca": "still", "color": "", "ubicacion": "Est.3 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 19, "emoji": "🛢️", "name": "Aceite de motor a gasolina", "cat": "Lubricantes", "marca": "havoline", "color": "", "ubicacion": "Est.3 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 20, "emoji": "🛢️", "name": "Aceite de compresor", "cat": "Lubricantes", "marca": "porten", "color": "", "ubicacion": "Est.3 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 21, "emoji": "🎨", "name": "Tinte para madera", "cat": "Pintura", "marca": "philaac", "color": "", "ubicacion": "Est.3 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 22, "emoji": "⚡", "name": "Espiral para cable", "cat": "Eléctrico", "marca": "schnider", "color": "", "ubicacion": "Est.3 Niv.L", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 23, "emoji": "🔧", "name": "Silicona para auto", "cat": "Adhesivos", "marca": "simonis", "color": "", "ubicacion": "Est.3 Niv.4", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 24, "emoji": "🔧", "name": "Adhesivo híbrido ecológico", "cat": "Adhesivos", "marca": "tek", "color": "", "ubicacion": "Est.3 Niv.4", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 25, "emoji": "🏗️", "name": "Adhesivo premium porcelanato", "cat": "Construcción", "marca": "construpega", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "16 k", "qtyIsText": true, "min": 1, "max": 10}, {"id": 26, "emoji": "🏗️", "name": "Impermeabilizante decorativo", "cat": "Construcción", "marca": "intaco", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 27, "emoji": "🏗️", "name": "Sellador impermeable", "cat": "Construcción", "marca": "industrial latina", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "1.5 k", "qtyIsText": true, "min": 1, "max": 10}, {"id": 28, "emoji": "🏗️", "name": "Masilla base para juntas", "cat": "Construcción", "marca": "romeral", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 29, "emoji": "🏗️", "name": "Pasta cementicia", "cat": "Construcción", "marca": "intaco", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "1 lbs", "qtyIsText": true, "min": 1, "max": 10}, {"id": 30, "emoji": "🏗️", "name": "Cemento refractario", "cat": "Construcción", "marca": "nitro", "color": "", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "4 k", "qtyIsText": true, "min": 1, "max": 10}, {"id": 31, "emoji": "🎨", "name": "Pintura latex acrílico (satín blanco)", "cat": "Pintura", "marca": "condor", "color": "satín blanco", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "1 caneca", "qtyIsText": true, "min": 1, "max": 10}, {"id": 32, "emoji": "🎨", "name": "Pintura de emulsión (blanco)", "cat": "Pintura", "marca": "indualca", "color": "blanco", "ubicacion": "Est.3 Niv.1", "qty": 0, "qtyDisplay": "1 caneca", "qtyIsText": true, "min": 1, "max": 10}, {"id": 33, "emoji": "🎨", "name": "Catalizador de pasta", "cat": "Pintura", "marca": "pinturas unidas", "color": "", "ubicacion": "Est.3 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 34, "emoji": "🔨", "name": "Electrodos para soldadura", "cat": "Herramientas", "marca": "aga", "color": "", "ubicacion": "Est.3 Niv.5", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 35, "emoji": "🔨", "name": "Embase para pistola de compresor", "cat": "Herramientas", "marca": "Truper", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 36, "emoji": "🔨", "name": "Adaptador para compresor", "cat": "Herramientas", "marca": "yetka", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 37, "emoji": "🔨", "name": "Tapa de pistola para compresor", "cat": "Herramientas", "marca": "designs", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 38, "emoji": "🔨", "name": "Tapa de pistola para compresor", "cat": "Herramientas", "marca": "comando", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 39, "emoji": "📦", "name": "Tubo de aluminio", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 40, "emoji": "🔨", "name": "Accesorios de pistola", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 41, "emoji": "📦", "name": "Accesorios plásticos para tubos", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 42, "emoji": "📦", "name": "Accesorios de bronce compresor", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 43, "emoji": "🔨", "name": "Poleas", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 44, "emoji": "📦", "name": "Tubo pequeño de aluminio", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 45, "emoji": "🔨", "name": "Prensa pequeña", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 46, "emoji": "🏗️", "name": "Accesorios de techo", "cat": "Construcción", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 47, "emoji": "🏠", "name": "Porta bicicletas", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 48, "emoji": "🏠", "name": "Agarradera de mueble", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 49, "emoji": "🏗️", "name": "Tapa de tornillo de techo", "cat": "Construcción", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 50, "emoji": "📦", "name": "Caucho de 3cm", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 51, "emoji": "📦", "name": "Tapones pequeños", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 5, "qtyDisplay": "5", "qtyIsText": false, "min": 1, "max": 10}, {"id": 52, "emoji": "🌿", "name": "Hilo y accesorios de motoguadaña", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 53, "emoji": "🔨", "name": "Embudo", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 54, "emoji": "🔨", "name": "Lijas", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 55, "emoji": "🦺", "name": "Orejeras motoguadaña", "cat": "Seguridad", "marca": "still", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 56, "emoji": "📦", "name": "Plástico protector barrederas", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 57, "emoji": "🔨", "name": "Repuesto rodillo", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 58, "emoji": "🔨", "name": "Rodillo", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 59, "emoji": "🦺", "name": "Arnés", "cat": "Seguridad", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 60, "emoji": "⚡", "name": "Cable 2x14 AWG", "cat": "Eléctrico", "marca": "termoflex", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 0, "qtyDisplay": "15 mts", "qtyIsText": true, "min": 1, "max": 10}, {"id": 61, "emoji": "📌", "name": "Funda de costal", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Est.2 Niv.3", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 62, "emoji": "🔨", "name": "Accesorios hidrolavadora", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.2", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 63, "emoji": "🔨", "name": "Brochas", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.3 Niv.L", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 64, "emoji": "🔨", "name": "Lima", "cat": "Herramientas", "marca": "beyota", "color": "", "ubicacion": "Est.2 Niv.L", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 65, "emoji": "🚰", "name": "Manguera de repuesto", "cat": "Plomería", "marca": "", "color": "", "ubicacion": "Est.1 Niv.S", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 66, "emoji": "⚡", "name": "Temporizador KG3163", "cat": "Eléctrico", "marca": "xiled", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 5, "qtyDisplay": "5", "qtyIsText": false, "min": 1, "max": 10}, {"id": 67, "emoji": "⚡", "name": "Cable VGA para monitor", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 68, "emoji": "⚡", "name": "Cable HDMI", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 69, "emoji": "⚡", "name": "Cable de video", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 70, "emoji": "⚡", "name": "Cable de red", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 71, "emoji": "⚡", "name": "Cable de poder 3 pines", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 72, "emoji": "⚡", "name": "Cable de video 3 salidas", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 73, "emoji": "⚡", "name": "Cable de video VGA", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.7", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 74, "emoji": "💡", "name": "Panel LED 6w", "cat": "Eléctrico", "marca": "sylvania", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 75, "emoji": "💡", "name": "Ojos de buey", "cat": "Eléctrico", "marca": "darlux", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 76, "emoji": "💡", "name": "Panel LED 3w", "cat": "Eléctrico", "marca": "ecoled", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 77, "emoji": "⚡", "name": "Cable SATA", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 78, "emoji": "⚡", "name": "Platinas", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 79, "emoji": "💡", "name": "Paflones", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 80, "emoji": "⚡", "name": "Cabezas de interruptor", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 81, "emoji": "⚡", "name": "Interruptor inalámbrico", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 82, "emoji": "⚡", "name": "Interruptor pequeño", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 83, "emoji": "🔨", "name": "Cabezas de amoladora", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 84, "emoji": "🔨", "name": "Cepillo de cerdas dura", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 85, "emoji": "📌", "name": "Amarras pequeñas", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 30, "qtyDisplay": "30", "qtyIsText": false, "min": 1, "max": 60}, {"id": 86, "emoji": "🔨", "name": "Discos de corte de amoladora", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 87, "emoji": "🔨", "name": "Discos de lija de amoladora", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 13, "qtyDisplay": "13", "qtyIsText": false, "min": 1, "max": 26}, {"id": 88, "emoji": "🏗️", "name": "Rollo de chova", "cat": "Construcción", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "10 mts", "qtyIsText": true, "min": 1, "max": 10}, {"id": 89, "emoji": "🚰", "name": "Teflón mediano", "cat": "Plomería", "marca": "comando", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 90, "emoji": "🚰", "name": "Teflón pequeño", "cat": "Plomería", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 91, "emoji": "📌", "name": "Cinta de precaución", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 92, "emoji": "🔨", "name": "Cinta maskin", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 93, "emoji": "🔨", "name": "Disco de lijas grande", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 15, "qtyDisplay": "15", "qtyIsText": false, "min": 1, "max": 30}, {"id": 94, "emoji": "🔨", "name": "Discos lija Fandeli", "cat": "Herramientas", "marca": "fandeli", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 95, "emoji": "🔒", "name": "Candado barril", "cat": "Seguridad", "marca": "gori", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 96, "emoji": "🔒", "name": "Candado rectangular", "cat": "Seguridad", "marca": "fanal", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 97, "emoji": "🔒", "name": "Cerradura doble cerrojo", "cat": "Seguridad", "marca": "triton", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 98, "emoji": "🔒", "name": "Candado anticisaya", "cat": "Seguridad", "marca": "cermax", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 99, "emoji": "🔒", "name": "Seguro de taladro", "cat": "Seguridad", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 100, "emoji": "🔒", "name": "Candados pequeños", "cat": "Seguridad", "marca": "glove", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 101, "emoji": "🔒", "name": "Cadena de hierro grande", "cat": "Seguridad", "marca": "", "color": "", "ubicacion": "Est.1 Niv.3", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 102, "emoji": "📦", "name": "Arandelas varios tamaños", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 103, "emoji": "📦", "name": "Clavos varios tamaños reutilizables", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 104, "emoji": "📦", "name": "Clavos grandes reutilizables", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 105, "emoji": "📦", "name": "Tornillos grandes reutilizables", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 106, "emoji": "🏗️", "name": "Accesorios de techo español reutilizables", "cat": "Construcción", "marca": "", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 107, "emoji": "📦", "name": "Tornillos para soporte de TV", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 108, "emoji": "🔨", "name": "Alaedera", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 109, "emoji": "🏗️", "name": "Tapas para techo", "cat": "Construcción", "marca": "", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 110, "emoji": "📦", "name": "Ganchos templadores", "cat": "Materiales", "marca": "rockstar", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 17, "qtyDisplay": "17", "qtyIsText": false, "min": 1, "max": 34}, {"id": 111, "emoji": "🚰", "name": "Accesorios de plomería (tubos, etc)", "cat": "Plomería", "marca": "", "color": "", "ubicacion": "Est.1 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 112, "emoji": "🚰", "name": "Desagües nuevos", "cat": "Plomería", "marca": "", "color": "", "ubicacion": "Est.1 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 113, "emoji": "🚰", "name": "Sifón para lavaplatos/lavamanos", "cat": "Plomería", "marca": "rival", "color": "", "ubicacion": "Est.1 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 114, "emoji": "⚡", "name": "Accesorios eléctricos (jardín, LED, cables)", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.1", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 115, "emoji": "🔒", "name": "Porta extintor", "cat": "Seguridad", "marca": "", "color": "", "ubicacion": "Est.1 Niv.1", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 116, "emoji": "⚡", "name": "Extensiones (naranja)", "cat": "Eléctrico", "marca": "", "color": "naranja", "ubicacion": "Est.1 Niv.1", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 117, "emoji": "⚡", "name": "Cortapico", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.1", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 118, "emoji": "⚡", "name": "Cables de energía", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.1", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 119, "emoji": "📌", "name": "Amarras grandes", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "1 funda", "qtyIsText": true, "min": 1, "max": 10}, {"id": 120, "emoji": "⚡", "name": "Cajas Exon", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 121, "emoji": "⚡", "name": "Cinta taipe", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.2 Niv.6", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 122, "emoji": "🧹", "name": "Aspiradora de pelo de perro", "cat": "Aseo", "marca": "", "color": "", "ubicacion": "Est.1 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 123, "emoji": "🧹", "name": "Accesorios aspiradora pelo de perro", "cat": "Aseo", "marca": "", "color": "", "ubicacion": "Est.1 Niv.2", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 124, "emoji": "🏠", "name": "Esterilla", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.1 Niv.4", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 125, "emoji": "🌿", "name": "Manguera sistema de riego", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Est.1 Niv.S", "qty": 0, "qtyDisplay": "10 mts", "qtyIsText": true, "min": 1, "max": 10}, {"id": 126, "emoji": "🔌", "name": "Manguera de lavadora", "cat": "Electrodomésticos", "marca": "", "color": "", "ubicacion": "Est.2 Niv.S", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 127, "emoji": "⚡", "name": "Tomacorrientes dobles", "cat": "Eléctrico", "marca": "maviju", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 128, "emoji": "⚡", "name": "Tomacorrientes con interruptor", "cat": "Eléctrico", "marca": "maviju", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 129, "emoji": "📌", "name": "Mosquetones de 5mm", "cat": "Varios", "marca": "rockstar", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 5, "qtyDisplay": "5", "qtyIsText": false, "min": 1, "max": 10}, {"id": 130, "emoji": "📌", "name": "Ganchos en S de 4mm", "cat": "Varios", "marca": "rockstar", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 131, "emoji": "🏠", "name": "Expansor para cortina de ducha", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 132, "emoji": "🏠", "name": "Paraguas", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 133, "emoji": "📦", "name": "Tubo cuadrado", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 134, "emoji": "🏠", "name": "Expansor de piscina", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 135, "emoji": "🧹", "name": "Expansor para escoba", "cat": "Aseo", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 136, "emoji": "📌", "name": "Bastón de hierro", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 137, "emoji": "🏗️", "name": "Empaste exterior", "cat": "Construcción", "marca": "sika", "color": "", "ubicacion": "Est.2 Niv.1", "qty": 0, "qtyDisplay": "20 kg", "qtyIsText": true, "min": 1, "max": 10}, {"id": 138, "emoji": "🏗️", "name": "Pasta cementina", "cat": "Construcción", "marca": "intaco", "color": "", "ubicacion": "Est.2 Niv.1", "qty": 0, "qtyDisplay": "20 kg", "qtyIsText": true, "min": 1, "max": 10}, {"id": 139, "emoji": "⚽", "name": "Red de arco de fútbol", "cat": "Deportes", "marca": "", "color": "", "ubicacion": "Est.2 Niv.1", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 140, "emoji": "💡", "name": "Controles luces LED", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.6", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 141, "emoji": "🔨", "name": "Martillo", "cat": "Herramientas", "marca": "Stanley", "color": "", "ubicacion": "Est.2 Niv.3", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 142, "emoji": "🔨", "name": "Destornillador", "cat": "Herramientas", "marca": "Stanley", "color": "", "ubicacion": "Sin ubicación", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 143, "emoji": "🔨", "name": "Alicate de presión", "cat": "Herramientas", "marca": "truper", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 144, "emoji": "🔨", "name": "Llave 11", "cat": "Herramientas", "marca": "stanley", "color": "", "ubicacion": "Sin ubicación", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 145, "emoji": "🔨", "name": "Llave 15", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 146, "emoji": "🔨", "name": "Estilete industrial", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.2 Niv.3", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 147, "emoji": "🔌", "name": "Accesorios de lavadora pequeña", "cat": "Electrodomésticos", "marca": "katcher", "color": "", "ubicacion": "Est.2 Niv.S", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 148, "emoji": "🔨", "name": "Llave de bujía de motoguadaña", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Est.1 Niv.1", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 149, "emoji": "🚰", "name": "Ducto para agua grande", "cat": "Plomería", "marca": "plastigama", "color": "", "ubicacion": "Est.2 Niv.3", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 150, "emoji": "📦", "name": "Ducto de aluminio", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.4", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 151, "emoji": "📦", "name": "Celdas de plástico", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.2 Niv.4", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 152, "emoji": "🔨", "name": "Gata para auto", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 153, "emoji": "🏠", "name": "Soporte de TV y patas", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 154, "emoji": "🔨", "name": "Brocas varios", "cat": "Herramientas", "marca": "truper", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 155, "emoji": "🔨", "name": "Taladro", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 156, "emoji": "🔨", "name": "Macho de roscar", "cat": "Herramientas", "marca": "truper", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 157, "emoji": "🔨", "name": "Machete", "cat": "Herramientas", "marca": "Truper", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 158, "emoji": "🧹", "name": "Fundas para aspiradora", "cat": "Aseo", "marca": "katcher", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 159, "emoji": "🌿", "name": "Bomba de cascada", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 160, "emoji": "🔨", "name": "Empuñadura de taladro", "cat": "Herramientas", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 161, "emoji": "📌", "name": "Manuales varios", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Zona baja", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 162, "emoji": "📦", "name": "Ruedas", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 163, "emoji": "🏠", "name": "Tapas para abre puerta", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.1 Niv.5", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 164, "emoji": "🔋", "name": "Pilas AAA", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Est.1 Niv.L", "qty": 16, "qtyDisplay": "16", "qtyIsText": false, "min": 1, "max": 32}, {"id": 165, "emoji": "🏠", "name": "Soporte de TV", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Est.2 Niv.L", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 166, "emoji": "🔋", "name": "Pila CR2032", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 4, "qtyDisplay": "4", "qtyIsText": false, "min": 1, "max": 8}, {"id": 167, "emoji": "🔋", "name": "Energizer A23", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 8, "qtyDisplay": "8", "qtyIsText": false, "min": 1, "max": 16}, {"id": 168, "emoji": "🔋", "name": "Kodak 23A", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 169, "emoji": "🔋", "name": "Rayoback CR2032", "cat": "Eléctrico", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 170, "emoji": "🏠", "name": "Toldo", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 171, "emoji": "👷", "name": "Botas punta de acero", "cat": "Seguridad", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 172, "emoji": "🚰", "name": "Expansor de agua", "cat": "Plomería", "marca": "forex", "color": "", "ubicacion": "Sin ubicación", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 173, "emoji": "🌿", "name": "Bote mezcladora motoguadaña", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 174, "emoji": "🔨", "name": "Cepillo de parrilla", "cat": "Herramientas", "marca": "truper", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 175, "emoji": "📌", "name": "Canecas vacías", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 3, "qtyDisplay": "3", "qtyIsText": false, "min": 1, "max": 6}, {"id": 176, "emoji": "🌿", "name": "Motoguadaña", "cat": "Jardín", "marca": "still", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 177, "emoji": "🏠", "name": "Rueda de horno", "cat": "Hogar", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 178, "emoji": "🌿", "name": "Tijera para podar de madera", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 179, "emoji": "🧹", "name": "Aspiradora", "cat": "Aseo", "marca": "katcher", "color": "", "ubicacion": "Sin ubicación", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 180, "emoji": "🔨", "name": "Hidrolavadora", "cat": "Herramientas", "marca": "black and Decker", "color": "", "ubicacion": "Sin ubicación", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 181, "emoji": "🧹", "name": "Limpiadora de césped sintético", "cat": "Aseo", "marca": "brush collect", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 182, "emoji": "🌿", "name": "Cortadora de césped", "cat": "Jardín", "marca": "black and Decker", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 183, "emoji": "🌿", "name": "Pala de horno", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 0, "qtyDisplay": "", "qtyIsText": false, "min": 1, "max": 10}, {"id": 184, "emoji": "🌿", "name": "Tijera de podar", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 185, "emoji": "📦", "name": "Alambre rollo", "cat": "Materiales", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 186, "emoji": "🌿", "name": "Cuchara grande", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 187, "emoji": "🌿", "name": "Pala grande", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 188, "emoji": "🌿", "name": "Rastrillo", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 189, "emoji": "🌿", "name": "Bombas de fumigar", "cat": "Jardín", "marca": "truper/matabi", "color": "", "ubicacion": "Sin ubicación", "qty": 2, "qtyDisplay": "2", "qtyIsText": false, "min": 1, "max": 5}, {"id": 190, "emoji": "🔨", "name": "Sierra", "cat": "Herramientas", "marca": "truper", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 191, "emoji": "🌿", "name": "Rastrillo pequeño", "cat": "Jardín", "marca": "truper", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 192, "emoji": "🌿", "name": "Tijera de podar grande", "cat": "Jardín", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 193, "emoji": "📌", "name": "Cobertor de lluvia", "cat": "Varios", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 194, "emoji": "🦺", "name": "Casco de motoguadaña", "cat": "Seguridad", "marca": "still", "color": "", "ubicacion": "Sin ubicación", "qty": 1, "qtyDisplay": "1", "qtyIsText": false, "min": 1, "max": 5}, {"id": 195, "emoji": "⛽", "name": "Tanques de gas", "cat": "Combustible", "marca": "", "color": "", "ubicacion": "Sin ubicación", "qty": 8, "qtyDisplay": "8", "qtyIsText": false, "min": 1, "max": 16}];
 
-var FB_BODEGA = 'https://casabecas-8afea-default-rtdb.firebaseio.com/bodega.json';
+function isAdmin(){return _role==='admin';}
+function isOper(){return _role==='oper';}
+function auditEntry(tipo,detalle,extra){
+  var e={tipo:tipo,detalle:detalle,quien:whoLabel(),fecha:now()};
+  if(extra)Object.assign(e,extra);
+  return e;
+}
 
+var _role='';
+var TASK_SEED = [{"id": "t1000", "emoji": "🔧", "name": "Bañar a los perros", "cat": "General", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1001", "emoji": "⚙️", "name": "Mantenimiento lavadora / secadora", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1002", "emoji": "⚙️", "name": "Mantenimiento de pool blaster", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1003", "emoji": "⚙️", "name": "Tanque de gas recarga", "cat": "Equipos", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1004", "emoji": "🧹", "name": "Limpieza de mesa exteriores", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1005", "emoji": "⚙️", "name": "Limpieza de sauna", "cat": "Equipos", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1006", "emoji": "🏗️", "name": "Mantenimiento puertas de aluminio", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1007", "emoji": "🔧", "name": "Compra de comida de perros", "cat": "General", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1008", "emoji": "🧹", "name": "Limpieza de cuarto de horno", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1009", "emoji": "⚙️", "name": "Revisión de máquinas", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1010", "emoji": "⚙️", "name": "Pendiente mant de hidro", "cat": "Equipos", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1011", "emoji": "⚡", "name": "Revisión de interruptores", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1012", "emoji": "⚡", "name": "Recarga de sensores de alarmas", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1013", "emoji": "🔧", "name": "Recarga de exintores", "cat": "General", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1014", "emoji": "⚡", "name": "Mant. De proyector, pantalla y electrónicos", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1015", "emoji": "⚙️", "name": "Mant billar y juegos", "cat": "Equipos", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1016", "emoji": "🚰", "name": "Revisión de sistema de riego", "cat": "Plomería", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1017", "emoji": "⚡", "name": "Mant de motor de puerta eléctrica", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1018", "emoji": "🏗️", "name": "Pasamanos", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1019", "emoji": "🏗️", "name": "Mant motor de gradas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1020", "emoji": "⚡", "name": "Sistema de alarma", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1021", "emoji": "🌿", "name": "Limpieza de mala yerba parqueadero", "cat": "Jardín", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1022", "emoji": "⚙️", "name": "Encender el generador", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1023", "emoji": "🌿", "name": "Limpieza de canal exterior", "cat": "Jardín", "lugar": "", "desc": "", "freq": 21, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1024", "emoji": "⚙️", "name": "Mantenimiento de calefones", "cat": "Equipos", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1025", "emoji": "⚡", "name": "Mantenimiento de parlantes", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1026", "emoji": "🧹", "name": "Limpieza de bodega trasera", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1027", "emoji": "🧹", "name": "Limpieza de bodega delantera", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1028", "emoji": "🌿", "name": "Regar plantas internas", "cat": "Jardín", "lugar": "", "desc": "", "freq": 1, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1029", "emoji": "⚙️", "name": "Mantenimeinto de bicicletas", "cat": "Equipos", "lugar": "", "desc": "", "freq": 90, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1030", "emoji": "🚰", "name": "Revisión de tuberías de agua", "cat": "Plomería", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1031", "emoji": "🏗️", "name": "Revisión de puertas internas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1032", "emoji": "🏗️", "name": "Mant de techo", "cat": "Estructura", "lugar": "", "desc": "", "freq": 180, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1033", "emoji": "🌿", "name": "Jardin", "cat": "Jardín", "lugar": "", "desc": "", "freq": 15, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1034", "emoji": "⚡", "name": "Timbres", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1035", "emoji": "🏗️", "name": "Puertas metalicas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1036", "emoji": "🏗️", "name": "Puertas de vidrio", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1037", "emoji": "🏗️", "name": "Limpieza de techo de Pergolas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1038", "emoji": "🏗️", "name": "Sillas de pergolas", "cat": "Estructura", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1039", "emoji": "⚡", "name": "Amplificador", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 60, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1040", "emoji": "🏗️", "name": "Madera", "cat": "Estructura", "lugar": "", "desc": "", "freq": 360, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1041", "emoji": "⚙️", "name": "Cuarto de estudio", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1042", "emoji": "🧹", "name": "Primer piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1043", "emoji": "🧹", "name": "Segundo Piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1044", "emoji": "🧹", "name": "Tercer piso tela arañas, polvo, camas", "cat": "Limpieza", "lugar": "", "desc": "", "freq": 7, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1045", "emoji": "⚡", "name": "Focos", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1046", "emoji": "⚡", "name": "Luminarias", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1047", "emoji": "⚡", "name": "Camaras", "cat": "Eléctrico", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}, {"id": "t1048", "emoji": "⚙️", "name": "Cuarto de lavadoras", "cat": "Equipos", "lugar": "", "desc": "", "freq": 30, "prio": "media", "materiales": "", "responsable": "", "costo": "", "lastDone": ""}];
+var tasks=[], hist=[], control={}, semanal={};
+var _editId=null,_execId=null,_hf='todos';
+var FB_MANT='https://casabecas-8afea-default-rtdb.firebaseio.com/mantenimiento.json';
 
-function isAdmin(){return window._appRole==='admin'||window._bodegaRole==='admin';}
-function isOper(){return _bodegaRole==='oper';}
-let inv = SEED.map(i=>({...i})); // will be overwritten by Firebase
-let logs = [];
-let histLog = [];
-let nextId = 5000;
-let editId = null;
-let txId = null;
-let txType = 'compra';
-
-function save(cb){
-  window.fbFetch(FB_BODEGA,{'method':'PUT','headers':{'Content-Type':'application/json'},'body':JSON.stringify({inv:inv,logs:logs,histLog:histLog})},function(e){
-    if(e){console.error('save:',e.message);if(cb)cb(e);return;}
+function saveAll(cb){
+  var data={tasks:tasks,hist:hist,control:control,semanal:semanal};
+  window.fbFetch(FB_MANT,{'method':'PUT','headers':{'Content-Type':'application/json'},'body':JSON.stringify(data)},function(e){
+    if(e){console.error('save error:',e.message);if(cb)cb(e);return;}
     if(cb)cb(null);
   });
 }
 
-function loadFromFirebase(cb){
-  window.fbFetch(FB_BODEGA,{},function(e,d){
+function loadAll(cb){
+  window.fbFetch(FB_MANT, {}, function(e,d){
     if(e){if(cb)cb(e);return;}
-    if(d&&d.inv&&d.inv.length){inv=d.inv;logs=d.logs||[];histLog=d.histLog||[];}
+    if(d&&d.tasks&&d.tasks.length) tasks=d.tasks;
+    if(d&&d.hist) hist=d.hist||[];
+    if(d&&d.control) control=d.control||{};
+    if(d&&d.semanal) semanal=d.semanal||{};
     if(cb)cb(null);
   });
 }
 
-// Items with text qty (e.g. "15 mts") get special treatment
-function st(item) {
-  if (item.qtyIsText) return 'txt'; // text quantity, no status bar logic
-  if (item.qty <= item.min) return 'low';
-  if (item.qty / item.max < 0.4) return 'med';
-  return 'ok';
+function showScreen(id){
+  document.getElementById('scr-login').style.display='none';
+  document.getElementById('scr-app').style.display='none';
+  document.getElementById(id).style.display=(id==='scr-login'?'flex':'block');
 }
 
-function displayQty(item) {
-  if (item.qtyIsText && item.qtyDisplay) return item.qtyDisplay;
-  return item.qty !== undefined ? String(item.qty) : '—';
+function tryLogin(role, err){
+  if(err) err.textContent='⏳ Cargando...';
+  loadAll(function(e){
+    if(e){if(err)err.textContent='Error de red. Verifica tu conexión.';return;}
+    _role=role;
+    showScreen('scr-app');
+    startApp();
+  });
+}
+function doLogin(){
+  var pi=document.getElementById('pi');
+  var v=pi.value.trim();
+  var dataRole=pi.getAttribute('data-role')||'';
+  var err=document.getElementById('lerr');
+  err.textContent='';
+  if(!v){err.textContent='Ingresa una clave';return;}
+  if(v=== null||v=== null){
+    var role=v=== null?'admin':'oper';
+    err.textContent='⏳ Cargando...';
+    loadAll(function(e){
+      if(e){err.textContent='Error de red. Verifica tu conexión.';return;}
+      _role=role;
+      showScreen('scr-app');
+      startApp();
+    });
+  } else {
+    err.textContent='❌ Clave incorrecta';
+    document.getElementById('pi').value='';
+    document.getElementById('pi').focus();
+    var b=document.getElementById('lbox');
+    b.style.animation='none';
+    setTimeout(function(){b.style.animation='shake .4s ease';},10);
+  }
 }
 
-function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const cat = document.getElementById('cat-f').value;
-  const sf = document.getElementById('stock-f').value;
+function startApp(role){
+  if(role) _role=role;
+  var rb=document.getElementById('rbadge');
+  if(_role==='admin'){
+    rb.textContent='🔑 Administrador';rb.className='rbadge rb-a';
+    document.getElementById('btn-xl').style.display='inline-flex';
+    document.getElementById('btn-add').style.display='inline-flex';
+    document.getElementById('btn-xl-hist').style.display='inline-flex';
+    var ba=document.getElementById('btn-audit');if(ba)ba.style.display='inline-flex';
+  } else {
+    rb.textContent='🔧 Operador';rb.className='rbadge rb-o';
+    document.getElementById('btn-xl').style.display='none';
+    document.getElementById('btn-add').style.display='inline-flex';
+    document.getElementById('btn-xl-hist').style.display='none';
+    var ba2=document.getElementById('btn-audit');if(ba2)ba2.style.display='none';
+  }
+  render();
+}
 
-  const fil = inv.filter(i =>
-    (!q || i.name.toLowerCase().includes(q) || (i.marca||'').toLowerCase().includes(q) || (i.ubicacion||'').toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q)) &&
-    (!cat || i.cat === cat) &&
-    (!sf || (sf === 'txt' ? i.qtyIsText : (!i.qtyIsText && st(i) === sf)))
-  );
+function doLogout(){
+  if(window._fbAuth)window._fbAuth.signOut();
+  _role='';window._appRole='';
+  var em=document.getElementById('auth-email');if(em)em.value='';
+  var pw=document.getElementById('auth-pass');if(pw)pw.value='';
+  var er=document.getElementById('lerr');if(er)er.textContent='';
+  document.getElementById('scr-app').style.display='none';
+  document.getElementById('scr-login').style.display='flex';
+}
 
-  const low = inv.filter(i => !i.qtyIsText && st(i) === 'low');
-  const med = inv.filter(i => !i.qtyIsText && st(i) === 'med');
-  const ok  = inv.filter(i => i.qtyIsText || st(i) === 'ok');
-  document.getElementById('s-total').textContent = inv.length;
-  document.getElementById('s-low').textContent = low.length;
-  document.getElementById('s-med').textContent = med.length;
-  document.getElementById('s-ok').textContent = ok.length;
+// ── STATUS ────────────────────────────────────────────────────────
+function getStatus(t){
+  if(!t.lastDone)return'over';
+  var next=new Date(new Date(t.lastDone).getTime()+t.freq*864e5);
+  var diff=Math.ceil((next-new Date())/864e5);
+  return diff<0?'over':diff<=7?'soon':'ok';
+}
+function getDaysText(t){
+  if(!t.lastDone)return{txt:'Nunca realizado',color:'var(--re)'};
+  var next=new Date(new Date(t.lastDone).getTime()+t.freq*864e5);
+  var diff=Math.ceil((next-new Date())/864e5);
+  if(diff<0)return{txt:'Vencida hace '+Math.abs(diff)+'d',color:'var(--re)'};
+  if(diff===0)return{txt:'Vence hoy',color:'var(--ye)'};
+  return{txt:'Próxima en '+diff+' días',color:'var(--gr)'};
+}
+var FLBL={7:'Semanal',15:'Quincenal',30:'Mensual',60:'Bimestral',90:'Trimestral',180:'Semestral',365:'Anual'};
+var CEMI={Eléctrico:'⚡',Plomería:'🚰',Jardín:'🌿',Limpieza:'🧹',Pintura:'🎨',Estructura:'🏗️',Equipos:'⚙️',Seguridad:'🔒',General:'🔧'};
 
-  const bar = document.getElementById('alert-bar');
-  if (low.length) {
-    bar.classList.add('show');
-    document.getElementById('alert-tags').innerHTML = low.slice(0,10).map(i =>
-      `<span class="atag">${i.emoji} ${i.name}</span>`
-    ).join('') + (low.length > 10 ? `<span class="atag">+${low.length-10} más</span>` : '');
-  } else bar.classList.remove('show');
-
-  const g = document.getElementById('grid');
-  if (!fil.length) { g.innerHTML = '<div class="empty"><div class="ei">📦</div><p>Sin resultados</p></div>'; return; }
-
-  g.innerHTML = fil.map(item => {
-    const s = st(item);
-    const qd = displayQty(item);
-    const pct = item.qtyIsText ? 70 : Math.min(100, Math.round(item.qty / item.max * 100));
-    const meta = [item.cat, item.marca, item.color, item.ubicacion].filter(Boolean).join(' · ');
-    // Build inline historial
-    var itemHist = histLog.filter(function(h){return h.articulo===item.name||h.itemId===item.id;});
-    var lbl={compra:'Compra',uso:'Uso',venta:'Venta',alta:'Alta',edicion:'Edición',baja:'Baja',toma_fisica:'Toma física'};
-    var clr={compra:'#38e07b',uso:'#ff9f43',venta:'#6c63ff',alta:'#38e07b',edicion:'#ffd166',baja:'#ff4757',toma_fisica:'#6c63ff'};
-    var histRows = itemHist.length ? itemHist.map(function(h,hi){
-      var hIdx = histLog.indexOf(h);
-      var tipo = h.tipo||h.type||'';
-      var editBtn = isAdmin() ? '<button data-hidx="'+hIdx+'" onclick="editMovimiento(parseInt(this.dataset.hidx))" style="background:rgba(108,99,255,.1);color:var(--ac,#6c63ff);border:1px solid rgba(108,99,255,.3);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer">✏️</button>'
-      +'<button data-hidx="'+hIdx+'" onclick="eliminarMovimiento(parseInt(this.dataset.hidx))" style="background:rgba(255,71,87,.1);color:#ff4757;border:1px solid rgba(255,71,87,.3);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;margin-left:4px">🗑</button>' : '';
-      return '<div style="border-left:3px solid '+(clr[tipo]||'#7a7f99')+';padding:6px 8px;margin-bottom:6px;background:rgba(0,0,0,.2);border-radius:0 6px 6px 0">'
-        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'
-          +'<span style="font-size:10px;font-weight:700;color:'+(clr[tipo]||'#7a7f99')+'">'+(lbl[tipo]||tipo)+'</span>'
-          +'<span style="font-size:10px;color:#7a7f99">'+(h.fechaTx||h.fecha||h.date||'')+'</span>'
-          +editBtn
-        +'</div>'
-        +(h.cantidad?'<div style="font-size:11px;font-weight:700">'+h.cantidad+'</div>':'')
-        +(h.diferencia?'<div style="font-size:11px;font-weight:700;color:'+(h.diferencia.indexOf('Faltante')>-1?'#ff4757':'#38e07b')+'">'+h.diferencia+'</div>':'')
-        +(h.proveedor?'<div style="font-size:10px;color:#7a7f99">'+h.proveedor+'</div>':'')
-        +(h.quienCompro||h.quienSolicita||h.quienSolicito||h.quienConto?'<div style="font-size:10px;color:#7a7f99">👤 '+(h.quienCompro||h.quienSolicita||h.quienSolicito||h.quienConto)+'</div>':'')
-        +(h.paraQue?'<div style="font-size:10px;color:#7a7f99">'+h.paraQue+'</div>':'')
-        +(h.obs?'<div style="font-size:10px;color:#7a7f99;font-style:italic">📝 '+h.obs+'</div>':'')
-        +(h.quien?'<div style="font-size:10px;color:#7a7f99;opacity:.7">por '+h.quien+'</div>':'')
-        +'</div>';
-    }).join('') : '<div style="font-size:11px;color:#7a7f99;padding:6px">Sin movimientos</div>';
-
-    return `<div class="card ${s === 'low' ? 'low' : ''}">
-      <div class="ch">
-        <span class="em">${item.emoji}</span>
-        <div style="display:flex;align-items:center;gap:5px">
-          ${s === 'low' ? '<span class="lbadge">REPONER</span>' : ''}
-          <div class="dot ${s}"></div>
-        </div>
-      </div>
-      <div class="cn">${item.name}</div>
-      <div class="cm">${meta}</div>
-      <div class="sr">
-        <span class="sl">Cantidad${item.qtyIsText ? ' (texto)' : ''}</span>
-        <span class="sn ${s}">${qd || '—'}</span>
-      </div>
-      ${!item.qtyIsText ? `<div class="pb"><div class="pf ${s}" style="width:${pct}%"></div></div>` : `<div style="height:3px;background:var(--ac);opacity:.3;border-radius:4px;margin-bottom:9px"></div>`}
-      <div class="ca">
-        <button class="qb" onclick="openTx(${item.id},'uso')" title="Registrar uso/venta">−</button>
-        <button class="qb" onclick="openTx(${item.id},'compra')" title="Registrar compra">+</button>
-        <button class="btn btn-sm" style="background:var(--s2);color:var(--ac);border:1px solid var(--bd)" onclick="openTx(${item.id},'fisica')" title="Toma física / conteo real">🔍 Toma física</button>
-        <span style="flex:1"></span>
-        ${isAdmin()?`<button class="btn btn-sm" style="background:var(--s2);color:var(--mu);border:1px solid var(--bd)" onclick="openEdit(${item.id})">✏️</button>
-        <button class="btn btn-d btn-sm" onclick="delItem(${item.id})">🗑</button>`:''}
-      </div>
-      <div style="margin-top:6px;border-top:1px solid var(--bd,#2e3350);padding-top:6px">
-        <button onclick="toggleHist(${item.id},this)" style="width:100%;background:var(--s2,#22263a);border:1px solid var(--bd,#2e3350);color:var(--mu,#7a7f99);border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;text-align:left">📋 Ver historial (${itemHist.length})</button>
-        <div id="hist-inline-${item.id}" style="display:none;margin-top:6px;max-height:220px;overflow-y:auto">${histRows}</div>
-      </div>
-    </div>`;
+// ── RENDER ────────────────────────────────────────────────────────
+function render(){
+  var q=document.getElementById('search').value.toLowerCase();
+  var cat=document.getElementById('fcat').value;
+  var fs=document.getElementById('fstatus').value;
+  var fil=tasks.filter(function(t){
+    return(!q||t.name.toLowerCase().includes(q)||(t.lugar||'').toLowerCase().includes(q))&&
+           (!cat||t.cat===cat)&&(!fs||getStatus(t)===fs);
+  });
+  var over=tasks.filter(function(t){return getStatus(t)==='over';}).length;
+  var soon=tasks.filter(function(t){return getStatus(t)==='soon';}).length;
+  document.getElementById('st-tot').textContent=tasks.length;
+  document.getElementById('st-over').textContent=over;
+  document.getElementById('st-soon').textContent=soon;
+  document.getElementById('st-ok').textContent=tasks.length-over-soon;
+  var g=document.getElementById('tasks-grid');
+  if(!fil.length){
+    g.innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:40px">🔧</div><p style="margin-top:10px">'+
+      (tasks.length?'Sin resultados.':(_role==='admin'?'No hay tareas. Usa + Nueva tarea para comenzar.':'No hay tareas registradas aún.'))+
+      '</p></div>';
+    return;
+  }
+  g.innerHTML=fil.map(function(t){
+    var st=getStatus(t);var di=getDaysText(t);
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    var sdClass=st==='over'?'sd-over':st==='soon'?'sd-warn':'sd-ok';
+    var cardClass=st==='over'?'overdue':st==='soon'?'due-soon':'ok';
+    var stTag=t.finalizada?'<span class="tag" style="color:var(--gr);border-color:rgba(56,224,123,.3);background:rgba(56,224,123,.08)">🏁 Finalizada</span>':
+              st==='over'?'<span class="tag tag-over">⚠ VENCIDA</span>':
+              st==='soon'?'<span class="tag tag-soon">⏰ Próxima</span>':
+                          '<span class="tag tag-ok">✅ Al día</span>';
+    var acts='<button class="btn btn-s btn-sm" onclick="openInfo(\''+t.id+'\')">ℹ️ Qué hacer</button> ';
+    if(t.finalizada){
+      acts+='';
+    } else if(t.tipo==='unico' && _role==='admin'){
+      acts+='<button class="btn btn-sm" style="background:var(--gr);color:#000" onclick="openExec(\''+t.id+'\',true)">🏁 Última actividad</button>';
+    } else {
+      acts+='<button class="btn btn-p btn-sm" onclick="openExec(\''+t.id+'\')">✅ Registrar</button>';
+    }
+    if(_role==='admin'){
+      acts+=' <button class="btn btn-y btn-sm" onclick="openEdit(\''+t.id+'\')">✏️ Editar</button>';
+      acts+=' <button class="btn btn-d btn-sm" onclick="delTask(\''+t.id+'\')">🗑</button>';
+    }
+    return'<div class="task-card '+cardClass+'">'+
+      '<div class="tc-head">'+
+        '<div class="tc-icon">'+em+'</div>'+
+        '<div class="tc-info">'+
+          '<div class="tc-name">'+x(t.name)+'</div>'+
+          '<div class="tc-lugar">📍 '+x(t.lugar||'Sin especificar')+'</div>'+
+        '</div>'+
+        '<div class="tc-status"><div class="status-dot '+sdClass+'"></div></div>'+
+      '</div>'+
+      (t.desc?'<div class="tc-desc">'+x(t.desc)+'</div>':'')+
+      '<div class="tc-tags">'+
+        '<span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+
+        '<span class="tag">📂 '+x(t.cat)+'</span>'+
+        stTag+
+        (t.prio?'<span class="tag">'+(t.prio==='alta'?'🔴':t.prio==='media'?'🟡':'🟢')+' '+t.prio+'</span>':'')+
+      '</div>'+
+      (t.responsable?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">👤 <strong>Responsable:</strong> '+x(t.responsable)+'</div>':'')+
+      (t.materiales?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">🧰 '+x(t.materiales)+'</div>':'')+
+      (t.costo?'<div style="font-size:11px;color:var(--mu);margin-bottom:6px">💰 $'+t.costo+' est.</div>':'')+
+      '<div class="tc-next">Próxima: <span style="color:'+di.color+'">'+di.txt+'</span></div>'+
+      (t.lastDone?'<div style="font-size:10px;color:var(--mu);margin-bottom:8px;font-family:monospace">Último: '+t.lastDone+(t.lastResp?' · '+x(t.lastResp):'')+'</div>':'')+
+      '<div class="tc-acts">'+acts+'</div>'+
+    '</div>';
   }).join('');
 }
 
-function openAdd() {
-  editId = null;
-  document.getElementById('add-title').textContent = '✨ Nuevo artículo';
-  ['f-em','f-name','f-marca','f-color','f-ubic','f-qty'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-min').value = '1';
-  document.getElementById('f-max').value = '10';
-  document.getElementById('ov-add').classList.add('open');
+// ── TASK CRUD ─────────────────────────────────────────────────────
+function openAdd(){
+  _editId=null;
+  document.getElementById('add-title').textContent='+ Nueva tarea de mantenimiento';
+  ['t-em','t-name','t-lugar','t-desc','t-mat','t-resp','t-costo','t-last'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('t-freq').value='30';
+  document.getElementById('t-prio').value='media';
+  document.getElementById('t-cat').value='General';
+  document.getElementById('t-tipo').value='recurrente';
+  openOv('ov-add');
 }
-function openEdit(id) {
-  if(!isAdmin()){toast('Solo el administrador puede editar artículos','err');return;}
-  var fc=document.getElementById('f-compra-section'); if(fc) fc.style.display='none';
-  editId = id;
-  const it = inv.find(i => i.id === id);
-  document.getElementById('add-title').textContent = '✏️ Editar artículo';
-  document.getElementById('f-em').value = it.emoji;
-  document.getElementById('f-name').value = it.name;
-  document.getElementById('f-cat').value = it.cat;
-  document.getElementById('f-marca').value = it.marca || '';
-  document.getElementById('f-color').value = it.color || '';
-  document.getElementById('f-ubic').value = it.ubicacion || '';
-  document.getElementById('f-qty').value = it.qtyIsText ? it.qtyDisplay : it.qty;
-  document.getElementById('f-min').value = it.min;
-  document.getElementById('f-max').value = it.max;
-  document.getElementById('ov-add').classList.add('open');
+function openEdit(id){
+  if(_role!=='admin'){toast('Solo el administrador puede editar','err');return;}
+  _editId=id;
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  document.getElementById('add-title').textContent='✏️ Editar tarea';
+  document.getElementById('t-em').value=t.emoji||'';
+  document.getElementById('t-name').value=t.name;
+  document.getElementById('t-cat').value=t.cat;
+  document.getElementById('t-lugar').value=t.lugar||'';
+  document.getElementById('t-desc').value=t.desc||'';
+  document.getElementById('t-freq').value=String(t.freq);
+  document.getElementById('t-prio').value=t.prio||'media';
+  document.getElementById('t-mat').value=t.materiales||'';
+  document.getElementById('t-resp').value=t.responsable||'';
+  document.getElementById('t-costo').value=t.costo||'';
+  document.getElementById('t-last').value=t.lastDone||'';
+  document.getElementById('t-tipo').value=t.tipo||'recurrente';
+  openOv('ov-add');
 }
-function closeAdd() { document.getElementById('ov-add').classList.remove('open'); }
-
-function saveItem() {
-  var name = (document.getElementById('f-name').value||'').trim();
-  var cat  = (document.getElementById('f-cat').value||'').trim();
-  if(!name){toast('Ingresa el nombre','err');return;}
-  if(!cat){toast('Ingresa la categoría','err');return;}
-  var qty = parseFloat(document.getElementById('f-qty').value)||0;
-  var isEdit = editId !== null;
-  var txDate = new Date().toLocaleString('es-EC',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  if(isEdit){
-    var it = inv.find(function(i){return i.id===editId;});
-    it.emoji=document.getElementById('f-em').value||'📦';
-    it.name=name; it.cat=cat;
-    it.marca=document.getElementById('f-marca').value||'';
-    it.ubicacion=document.getElementById('f-ubic').value||'';
-    it.color=document.getElementById('f-color').value||'';
-    it.qty=qty;
-    it.min=parseFloat(document.getElementById('f-min').value)||0;
-    it.max=parseFloat(document.getElementById('f-max').value)||0;
-    histLog.unshift({tipo:'edicion',emoji:it.emoji,articulo:it.name,categoria:it.cat,cantidad:'—',desc:'Edición de artículo',fecha:txDate,quien:whoLabel()});
-  } else {
-    var newId = Date.now();
-    var proveedor = (document.getElementById('f-proveedor').value||'').trim();
-    var quienCompro = (document.getElementById('f-quien-compro').value||'').trim();
-    var paraQue = (document.getElementById('f-para-que').value||'').trim();
-    var quienSol = (document.getElementById('f-quien-solicito').value||'').trim();
-    var obs = (document.getElementById('f-obs').value||'').trim();
-    var fechaCompra = document.getElementById('f-fecha-compra').value||'';
-    var newItem = {
-      id:newId,
-      emoji:document.getElementById('f-em').value||'📦',
-      name:name, cat:cat,
-      marca:document.getElementById('f-marca').value||'',
-      ubicacion:document.getElementById('f-ubic').value||'',
-      color:document.getElementById('f-color').value||'',
-      qty:qty,
-      min:parseFloat(document.getElementById('f-min').value)||0,
-      max:parseFloat(document.getElementById('f-max').value)||0,
-      qtyIsText:false
-    };
-    inv.push(newItem);
-    histLog.unshift({
-      tipo:'alta', emoji:newItem.emoji, articulo:name, categoria:cat,
-      cantidad:'+'+qty, desc:'Alta de artículo'+(proveedor?' | Proveedor: '+proveedor:''),
-      fecha:txDate, fechaTx:fechaCompra,
-      proveedor:proveedor,
-      dirProveedor:document.getElementById('f-dir-proveedor').value||'',
-      telProveedor:document.getElementById('f-tel-proveedor').value||'',
-      quienCompro:quienCompro, paraQue:paraQue, quienSolicito:quienSol, obs:obs,
-      quien:whoLabel()
-    });
-    if(qty>0) logs.unshift({itemId:newId,itemName:name,itemEmoji:newItem.emoji,type:'compra',delta:qty,desc:'Alta inicial'+(proveedor?' - '+proveedor:''),date:txDate});
-  }
-  editId=null;
-  save(function(){ closeBov('ov-add'); render(); toast(isEdit?'✅ Artículo actualizado':'✅ Artículo agregado','ok'); });
-}
-function delItem(id) {
-  if(!isAdmin()){toast('Solo el administrador puede eliminar artículos','err');return;}
-  if (!confirm('¿Eliminar este artículo?')) return;
-  inv = inv.filter(i => i.id !== id);
-  save(function(){ render(); }); toast('Artículo eliminado', 'warn');
-}
-
-// TX
-function openTx(id, type) {
-  txId = id; txType = type;
-  var it = inv.find(function(i){return i.id===id;});
-  var titles = {compra:'Entrada (+)', uso:'Salida (−)', fisica:'🔍 Toma física'};
-  document.getElementById('tx-title').textContent = (it.emoji||'') + ' ' + it.name + ' — ' + titles[type];
-  // Set today's date
-  var today = new Date().toISOString().split('T')[0];
-  var fcEl = document.getElementById('tx-fecha-compra');
-  var fuEl = document.getElementById('tx-fecha-uso');
-  var ffEl = document.getElementById('tx-fecha-fisica');
-  if(fcEl) fcEl.value = today;
-  if(fuEl) fuEl.value = today;
-  if(ffEl) ffEl.value = today;
-  // Show correct fields
-  document.getElementById('tx-compra-fields').style.display = type==='compra'?'block':'none';
-  document.getElementById('tx-uso-fields').style.display = type==='uso'?'block':'none';
-  document.getElementById('tx-fisica-fields').style.display = type==='fisica'?'block':'none';
-  // Clear fields
-  ['tx-qty-compra','tx-proveedor','tx-dir-proveedor','tx-tel-proveedor','tx-quien-compro','tx-para-que-compra','tx-quien-solicito-compra','tx-obs-compra',
-   'tx-qty-uso','tx-quien-solicita','tx-para-que-uso','tx-obs-uso',
-   'tx-qty-fisica','tx-quien-fisica','tx-obs-fisica'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
-  if(type==='fisica' && !it.qtyIsText){
-    var qf=document.getElementById('tx-qty-fisica'); if(qf) qf.placeholder='Cantidad real encontrada (sistema: '+(it.qty||0)+')';
-  }
-  document.getElementById('ov-tx').classList.add('open');
-}
-function setTxType(t) {
-  txType = t;
-  ['compra','uso','venta'].forEach(x => document.getElementById('tab-'+x).classList.toggle('active', x === t));
-  const labels = {
-    compra: ['Cantidad comprada (ej: 2, "15 mts")', '¿A quién / dónde compré?'],
-    uso:    ['Cantidad usada', '¿En qué lo usé? / ¿Para qué proyecto?'],
-    venta:  ['Cantidad vendida', '¿A quién vendí?'],
+function saveTask(){
+  var name=document.getElementById('t-name').value.trim();
+  if(!name){toast('Ingresa el nombre de la tarea','err');return;}
+  var obj={
+    emoji:document.getElementById('t-em').value.trim(),
+    name:name,cat:document.getElementById('t-cat').value,
+    lugar:document.getElementById('t-lugar').value.trim(),
+    desc:document.getElementById('t-desc').value.trim(),
+    freq:parseInt(document.getElementById('t-freq').value),
+    prio:document.getElementById('t-prio').value,
+    materiales:document.getElementById('t-mat').value.trim(),
+    responsable:document.getElementById('t-resp').value.trim(),
+    costo:document.getElementById('t-costo').value,
+    lastDone:document.getElementById('t-last').value,
+    tipo:document.getElementById('t-tipo').value
   };
-  document.getElementById('tx-qty-label').textContent = labels[t][0];
-  document.getElementById('tx-desc-label').textContent = labels[t][1];
+  if(_editId){
+    Object.assign(tasks.find(function(t){return t.id===_editId;}),obj);
+    hist.unshift({tipo:'edit',tarea:name,fecha:now(),detalle:'Editado por admin'});
+  } else {
+    obj.id='t'+Date.now();tasks.push(obj);
+    hist.unshift({tipo:'add',tarea:name,fecha:now(),detalle:'Nueva tarea: '+name+' · '+(FLBL[obj.freq]||obj.freq+'d')});
+  }
+  saveAll(function(){closeOv('ov-add');render();toast('✅ Guardado','ok');});
 }
-function closeTx() { document.getElementById('ov-tx').classList.remove('open'); }
-function saveTx() {
-  const qtyRaw = document.getElementById('tx-qty').value.trim();
-  const desc = document.getElementById('tx-desc').value.trim();
-  if (!qtyRaw) { toast('Ingresa la cantidad', 'err'); return; }
-  if (!desc) { toast('Agrega una descripción', 'err'); return; }
-
-  const it = inv.find(i => i.id === txId);
-  const qtyNum = parseFloat(qtyRaw);
-  const isNum = !isNaN(qtyNum) && !/[a-zA-Z]/.test(qtyRaw);
-
-  let delta = 0;
-  if (isNum) {
-    delta = txType === 'compra' ? Math.abs(qtyNum) : -Math.abs(qtyNum);
-    if (!it.qtyIsText) {
-      it.qty = Math.max(0, it.qty + delta);
-    }
-  }
-  // Update text display if needed
-  if (it.qtyIsText) {
-    it.qtyDisplay = `${qtyRaw} (actualizado)`;
-  }
-
-  const txDate = new Date().toLocaleString('es-EC', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  logs.unshift({
-    itemId: txId, itemName: it.name, itemEmoji: it.emoji,
-    type: txType, delta: isNum ? delta : qtyRaw, desc, date: txDate
-  });
-  const histTipo = txType === 'compra' ? (it.qty <= it.min ? 'reposicion' : 'compra') : txType === 'uso' ? 'uso' : 'venta';
-  histLog.unshift({
-    tipo: histTipo,
-    emoji: it.emoji,
-    articulo: it.name,
-    categoria: it.cat,
-    cantidad: isNum ? (txType === 'compra' ? '+' + Math.abs(delta) : delta) : qtyRaw,
-    desc: desc,
-    fecha: txDate,
-    obs: ''
-  ,quien:whoLabel()});
-  save(function(){ closeTx(); render(); });
-  const msgs = { compra: '✅ Compra registrada', uso: '🔧 Uso registrado', venta: '💰 Venta registrada' };
-  toast(msgs[txType], 'ok');
-  if (!it.qtyIsText && st(it) === 'low') setTimeout(() => toast('⚠️ ' + it.name + ' bajo mínimo', 'warn'), 1200);
+function delTask(id){
+  if(!isAdmin()){toast('Solo el administrador puede eliminar tareas','err');return;}
+  if(!confirm('¿Eliminar esta tarea?'))return;
+  tasks=tasks.filter(function(t){return t.id!==id;});
+  saveAll(function(){render();toast('Eliminada','warn');});
 }
 
-// LOG
-function openLog(id){
-  var it=inv.find(function(i){return i.id===id;});
-  if(!it)return;
-  document.getElementById('log-title').textContent=(it.emoji||'📦')+' '+it.name+' — Historial';
-  // Merge histLog entries for this item
-  var entries=histLog.filter(function(h){return h.articulo===it.name||h.itemId===id;});
-  // Also include logs entries not in histLog
-  var logEntries=logs.filter(function(l){return l.itemId===id;});
-  var ll=document.getElementById('log-list');
-  if(!ll) ll=document.getElementById('log-list-item');
-  if(!entries.length&&!logEntries.length){
-    ll.innerHTML='<div style="text-align:center;color:#7a7f99;padding:20px">Sin movimientos registrados</div>';
-    document.getElementById('ov-log').classList.add('open');
+// ── INFO (QUÉ HACER) ────────────────────────────────────────────────
+function openInfo(id){
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  var em=t.emoji||(CEMI[t.cat]||'🔧');
+  document.getElementById('info-title').textContent=em+' '+t.name;
+  var di=getDaysText(t);
+  var html='<div class="tc-tags" style="margin-bottom:10px">'+
+      '<span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+
+      '<span class="tag">📂 '+x(t.cat||'')+'</span>'+
+      (t.prio?'<span class="tag">'+(t.prio==='alta'?'🔴':t.prio==='media'?'🟡':'🟢')+' '+t.prio+'</span>':'')+
+    '</div>'+
+    '<div class="fg"><label>📍 Lugar</label><div>'+x(t.lugar||'Sin especificar')+'</div></div>'+
+    (t.desc?'<div class="fg"><label>📝 Descripción de la actividad</label><div>'+x(t.desc)+'</div></div>':'')+
+    (t.materiales?'<div class="fg"><label>🧰 Materiales necesarios</label><div>'+x(t.materiales)+'</div></div>':'')+
+    (t.costo?'<div class="fg"><label>💰 Costo estimado</label><div>$'+x(String(t.costo))+'</div></div>':'')+
+    (t.responsable?'<div class="fg"><label>👤 Responsable</label><div>'+x(t.responsable)+'</div></div>':'')+
+    '<div class="fg"><label>📅 Estado</label><div style="color:'+di.color+'">'+di.txt+'</div></div>'+
+    (t.lastDone?'<div class="fg"><label>🕓 Último registro</label><div>'+t.lastDone+(t.lastResp?' · '+x(t.lastResp):'')+'</div></div>':'');
+  document.getElementById('info-body').innerHTML=html;
+  openOv('ov-info');
+}
+
+// ── EXEC ──────────────────────────────────────────────────────────
+function openExec(id,isLast){
+  _execId=id;
+  window._execIsLast=!!isLast;
+  var t=tasks.find(function(t){return t.id===id;});if(!t)return;
+  document.getElementById('exec-title').textContent=(isLast?'🏁 Última actividad — ':'✅ ')+(t.emoji||CEMI[t.cat]||'🔧')+' '+t.name;
+  document.querySelector('#ov-exec h3').textContent=isLast?'🏁 Última actividad (finaliza la tarea)':'✅ Registrar ejecución';
+  document.getElementById('ex-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('ex-resp').value=t.responsable||'';
+  document.getElementById('ex-trabajo').value='';
+  document.getElementById('ex-mat').value=t.materiales||'';
+  document.getElementById('ex-costo').value=t.costo||'';
+  document.getElementById('ex-estado').value='bueno';
+  document.getElementById('ex-obs').value='';
+  openOv('ov-exec');
+}
+function saveExec(){
+  var fecha=document.getElementById('ex-fecha').value;
+  var resp=document.getElementById('ex-resp').value.trim();
+  if(!fecha){toast('Selecciona la fecha','err');return;}
+  if(!resp){toast('Ingresa el responsable','err');return;}
+  var t=tasks.find(function(t){return t.id===_execId;});if(!t)return;
+  var wasLast=!!window._execIsLast;
+  t.lastDone=fecha;t.lastResp=resp;
+  if(wasLast)t.finalizada=true;
+  var entry={
+    tipo:'exec',tarea:t.name,cat:t.cat,lugar:t.lugar,
+    fecha:now(),fechaEjecucion:fecha,responsable:resp,
+    trabajo:document.getElementById('ex-trabajo').value.trim(),
+    materiales:document.getElementById('ex-mat').value.trim(),
+    costo:document.getElementById('ex-costo').value,
+    estado:document.getElementById('ex-estado').value,
+    obs:document.getElementById('ex-obs').value.trim()+(wasLast?' (🏁 Última actividad — tarea finalizada)':'')
+  };
+  hist.unshift(entry);
+  // Auto-update control mensual
+  var mk=fecha.substring(0,7);
+  if(!control[mk])control[mk]={};
+  if(!control[mk][t.id])control[mk][t.id]={done:true,executions:[]};
+  if(!control[mk][t.id].executions)control[mk][t.id].executions=[];
+  control[mk][t.id].done=true;
+  control[mk][t.id].executions.push({fecha:fecha,resp:resp});
+  saveAll(function(){closeOv('ov-exec');render();toast(wasLast?'🏁 Actividad finalizada':'✅ Ejecución registrada','ok');window._execIsLast=false;});
+}
+
+// ── ACTUALIZAR FECHAS EN LOTE ──────────────────────────────────────
+function openFechas(){
+  renderFechas();
+  openOv('ov-fechas');
+}
+function renderFechas(){
+  var el=document.getElementById('fechas-list');
+  if(!tasks.length){
+    el.innerHTML='<div class="empty"><p>No hay tareas.</p></div>';
     return;
   }
-  var admin=isAdmin();
-  var lbl={compra:'🛒 Compra',uso:'🔧 Uso',venta:'💰 Venta',alta:'➕ Alta',edicion:'✏️ Edición',baja:'🗑 Baja',toma_fisica:'🔍 Toma física'};
-  var clr={compra:'var(--gr)',uso:'var(--or)',venta:'var(--ac)',alta:'var(--gr)',edicion:'var(--ye)',baja:'var(--re)',toma_fisica:'var(--ac)'};
-  ll.innerHTML=entries.map(function(h,idx){
-    var tipo=h.tipo||h.type||'';
-    var badge='<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(clr[tipo]||'#7a7f99')+'22;color:'+(clr[tipo]||'#7a7f99')+'">'+(lbl[tipo]||tipo)+'</span>';
-    var editBtn=admin?'<button data-hidx="'+histLog.indexOf(h)+'" onclick="editMovimiento(parseInt(this.dataset.hidx))" style="background:rgba(108,99,255,.1);color:var(--ac);border:1px solid rgba(108,99,255,.3);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;margin-left:auto">✏️ Editar</button>':'';
-    return '<div style="background:var(--s2,#22263a);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:12px;margin-bottom:8px">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+badge
-        +'<span style="font-size:11px;color:#7a7f99;font-family:monospace;margin-left:4px">'+(h.fechaTx||h.fecha||h.date||'')+'</span>'
-        +editBtn+'</div>'
-      +(h.cantidad?'<div style="font-size:13px;font-weight:700;margin-bottom:4px">Cantidad: '+h.cantidad+'</div>':'')
-      +(h.diferencia?'<div style="font-size:13px;font-weight:700;margin-bottom:4px;color:'+(h.diferencia.indexOf('Faltante')>-1?'var(--re,#ff4757)':'var(--gr,#38e07b)')+'">'+h.diferencia+'</div>':'')
-      +(h.sistemaAntes!==undefined&&h.sistemaAntes!==''?'<div style="font-size:12px;color:#7a7f99">📊 Sistema antes de la toma: '+h.sistemaAntes+'</div>':'')
-      +(h.quienConto?'<div style="font-size:12px;color:#7a7f99">👤 Contó: '+h.quienConto+'</div>':'')
-      +(h.proveedor?'<div style="font-size:12px;color:#7a7f99">🏪 Proveedor: '+h.proveedor+'</div>':'')
-      +(h.dirProveedor?'<div style="font-size:12px;color:#7a7f99">📍 Dirección: '+h.dirProveedor+'</div>':'')
-      +(h.telProveedor?'<div style="font-size:12px;color:#7a7f99">📞 Tel: '+h.telProveedor+'</div>':'')
-      +(h.quienCompro?'<div style="font-size:12px;color:#7a7f99">👤 Compró: '+h.quienCompro+'</div>':'')
-      +(h.quienSolicita||h.quienSolicito?'<div style="font-size:12px;color:#7a7f99">👤 Solicitó: '+(h.quienSolicita||h.quienSolicito)+'</div>':'')
-      +(h.paraQue?'<div style="font-size:12px;color:#7a7f99">🎯 Para qué: '+h.paraQue+'</div>':'')
-      +(h.desc&&!h.proveedor?'<div style="font-size:12px;color:#7a7f99">'+h.desc+'</div>':'')
-      +(h.obs?'<div style="font-size:12px;color:#7a7f99">💬 Obs: '+h.obs+'</div>':'')
-      +(h.quien?'<div style="font-size:11px;color:#7a7f99;margin-top:4px">Registrado por: '+h.quien+'</div>':'')
+  el.innerHTML=tasks.map(function(t,i){
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--bd)">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:600;font-size:13px">'+em+' '+x(t.name)+'</div>'+
+        (t.responsable?'<div style="font-size:11px;color:var(--mu)">👤 '+x(t.responsable)+'</div>':'')+
+      '</div>'+
+      '<input type="date" data-tid="'+t.id+'" class="fecha-input" value="'+(t.lastDone||'')+'" '+
+        'style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:6px 8px;color:var(--tx);font-size:13px">'+
+    '</div>';
+  }).join('');
+}
+function saveFechas(){
+  var inputs=document.querySelectorAll('#fechas-list .fecha-input');
+  var count=0;
+  inputs.forEach(function(inp){
+    var val=inp.value;
+    if(!val)return;
+    var t=tasks.find(function(t){return t.id===inp.getAttribute('data-tid');});
+    if(!t)return;
+    if(t.lastDone!==val){t.lastDone=val;count++;}
+  });
+  if(!count){toast('No hay cambios para guardar','warn');return;}
+  hist.unshift({tipo:'edit',tarea:'Actualización masiva de fechas',fecha:now(),
+    detalle:'Se actualizó la última fecha realizada de '+count+' actividad(es) por '+(_role==='admin'?'el administrador':'el operador')});
+  saveAll(function(){closeOv('ov-fechas');render();toast('✅ '+count+' fecha(s) actualizada(s)','ok');});
+}
+
+// ── CRONOGRAMA DE LA SEMANA ────────────────────────────────────────
+function getWeekKey(d){
+  d=d||new Date();
+  var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=dt.getUTCDay()||7;
+  dt.setUTCDate(dt.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  var weekNo=Math.ceil((((dt-yearStart)/864e5)+1)/7);
+  return dt.getUTCFullYear()+'-W'+String(weekNo).padStart(2,'0');
+}
+function openCronograma(){
+  renderCronograma();
+  openOv('ov-crono');
+}
+function cronogramaList(){
+  var list=tasks.filter(function(t){
+    if(t.finalizada)return false;
+    if(t.freq===7)return true;
+    var next=t.lastDone?new Date(new Date(t.lastDone).getTime()+t.freq*864e5):null;
+    if(!next)return true;
+    var diff=Math.ceil((next-new Date())/864e5);
+    return diff<=7;
+  });
+  list.sort(function(a,b){
+    var oa=getStatus(a)==='over'?0:getStatus(a)==='soon'?1:2;
+    var ob=getStatus(b)==='over'?0:getStatus(b)==='soon'?1:2;
+    return oa-ob;
+  });
+  return list;
+}
+function renderCronograma(){
+  var el=document.getElementById('crono-list');
+  var wk=getWeekKey();
+  if(!semanal[wk])semanal[wk]={};
+  var list=cronogramaList();
+  var doneCount=list.filter(function(t){return !!semanal[wk][t.id];}).length;
+  document.getElementById('crono-cumplimiento').textContent=list.length?
+    '✅ Cumplimiento de la semana: '+doneCount+'/'+list.length+' actividades marcadas':'';
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div style="font-size:36px">🗓️</div><p style="margin-top:8px">No hay actividades semanales ni próximas a vencer esta semana.</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(function(t){
+    var st=getStatus(t);var di=getDaysText(t);
+    var em=t.emoji||(CEMI[t.cat]||'🔧');
+    var checked=!!semanal[wk][t.id];
+    var stTag=st==='over'?'<span class="tag tag-over">⚠ VENCIDA</span>':
+              st==='soon'?'<span class="tag tag-soon">⏰ Próxima</span>':
+                          '<span class="tag tag-ok">✅ Al día</span>';
+    return '<div class="task-card" style="margin-bottom:10px'+(checked?';opacity:.65':'')+'">'+
+      '<div class="tc-head"><div class="tc-icon">'+em+'</div><div class="tc-info">'+
+        '<div class="tc-name">'+(checked?'<s>':'')+x(t.name)+(checked?'</s>':'')+'</div>'+
+        '<div class="tc-lugar">📍 '+x(t.lugar||'Sin especificar')+'</div>'+
+      '</div></div>'+
+      '<div class="tc-tags"><span class="tag tag-freq">🔄 '+(FLBL[t.freq]||t.freq+'d')+'</span>'+stTag+'</div>'+
+      (t.responsable?'<div style="font-size:11px;color:var(--mu);margin:6px 0">👤 <strong>Responsable:</strong> '+x(t.responsable)+'</div>':'')+
+      '<div class="tc-next">Próxima: <span style="color:'+di.color+'">'+di.txt+'</span></div>'+
+      '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<button class="btn btn-s btn-sm" onclick="openInfo(\''+t.id+'\')">ℹ️ Qué hacer</button>'+
+        '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx);cursor:pointer">'+
+          '<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCronoCheck(\''+t.id+'\',this.checked)"> Cumplida esta semana'+
+        '</label>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function toggleCronoCheck(id,val){
+  var wk=getWeekKey();
+  if(!semanal[wk])semanal[wk]={};
+  if(val)semanal[wk][id]=true;else delete semanal[wk][id];
+  saveAll(function(){renderCronograma();});
+}
+function downloadCronograma(){
+  var wk=getWeekKey();
+  var list=cronogramaList();
+  var rows=[['Tarea','Categoria','Lugar','Responsable','Frecuencia','Estado','Proxima','Cumplida esta semana']];
+  list.forEach(function(t){
+    var di=getDaysText(t);
+    rows.push([t.name,t.cat||'',t.lugar||'',t.responsable||'',FLBL[t.freq]||t.freq+'d',
+      getStatus(t)==='over'?'Vencida':getStatus(t)==='soon'?'Proxima':'Al dia',
+      di.txt,(semanal[wk]&&semanal[wk][t.id])?'Si':'No']);
+  });
+  var lines=rows.map(function(r){
+    return r.map(function(c){var s=c==null?'':String(c);return '"'+s.split('"').join('""')+'"';}).join(',');
+  });
+  var csv=lines.join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Cronograma_semana_'+wk+'.csv';
+  a.style.display='none';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Descargado','ok');
+}
+
+// ── CONTROL MENSUAL ───────────────────────────────────────────────
+function openControl(){
+  var d=new Date();
+  var mk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var sel=document.getElementById('ctrl-mes-sel');
+  if(sel)sel.value=mk;
+  loadControlMes(mk);
+  openOv('ov-control');
+}
+
+function loadControlMes(mk){
+  if(!mk){var d=new Date();mk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  var parts=mk.split('-');
+  var ml=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var mLabel=ml[parseInt(parts[1])-1]+' '+parts[0];
+  document.getElementById('control-mes').textContent=mLabel;
+  window._ctrlMes=mk;
+  window._ctrlFilter='all';
+  renderControlGrid(mk,'all');
+}
+
+function filterControl(tipo,btn){
+  document.querySelectorAll('#ov-control .btn').forEach(function(b){
+    if(b.id&&b.id.startsWith('ctrl-f-')){
+      b.style.background='var(--s2)';b.style.border='1px solid var(--bd)';b.style.color='var(--tx)';
+    }
+  });
+  if(btn){btn.style.background='var(--ac)';btn.style.color='#fff';btn.style.border='none';}
+  window._ctrlFilter=tipo;
+  renderControlGrid(window._ctrlMes||'',tipo);
+}
+
+function renderControlGrid(mk,filtro){
+  var g=document.getElementById('month-grid');
+  var ctrlMk=control[mk]||{};
+  var filtered=tasks.filter(function(t){
+    var execs=(ctrlMk[t.id]&&ctrlMk[t.id].executions)||[];
+    var isDone=execs.length>0||(ctrlMk[t.id]&&ctrlMk[t.id].done);
+    if(filtro==='done')return isDone;
+    if(filtro==='pend')return !isDone;
+    return true;
+  });
+  if(!filtered.length){
+    g.innerHTML='<div style="color:var(--mu);text-align:center;padding:20px;grid-column:1/-1">Sin tareas para mostrar</div>';
+    return;
+  }
+  g.innerHTML=filtered.map(function(t){
+    var ctrlT=ctrlMk[t.id]||{};
+    var execs=ctrlT.executions||[];
+    // If old format (done:bool), show single check
+    if(execs.length===0&&ctrlT.done){
+      execs=[{fecha:t.lastDone||'—',resp:t.lastResp||''}];
+    }
+    var isDone=execs.length>0;
+    var clr=isDone?'var(--gr)':t.prio==='alta'?'var(--re)':t.prio==='media'?'var(--or)':'var(--bd)';
+    // Build execution checks
+    var checksHtml='';
+    if(execs.length>0){
+      checksHtml='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">';
+      execs.forEach(function(ex){
+        checksHtml+='<div style="display:flex;align-items:center;gap:6px;font-size:12px">'
+          +'<span style="color:var(--gr);font-weight:700">✅</span>'
+          +'<span style="color:var(--tx)">'+ex.fecha+'</span>'
+          +(ex.resp?'<span style="color:var(--mu)">· '+x(ex.resp)+'</span>':'')
+          +'</div>';
+      });
+      checksHtml+='</div>';
+    } else {
+      checksHtml='<div style="margin-top:6px;font-size:12px;color:var(--mu)">⬜ Sin ejecuciones este mes</div>';
+    }
+    return '<div style="border-left:3px solid '+clr+';padding:12px;margin-bottom:8px;background:var(--s);border-radius:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-size:16px">'+(isDone?'✅':'⬜')+'</span>'
+        +'<div style="flex:1">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx)">'+x(t.name)+'</div>'
+          +'<div style="font-size:11px;color:var(--mu)">'+x(t.cat||'')+(t.freq?' · '+t.freq+'d':'')+(t.responsable?' · 👤 '+x(t.responsable):'')+'</div>'
+        +'</div>'
+        +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(isDone?'rgba(56,224,123,.15)':'rgba(122,127,153,.1)')+';color:'+(isDone?'var(--gr)':'var(--mu)')+'">'+execs.length+(execs.length===1?' vez':' veces')+'</span>'
+      +'</div>'
+      +checksHtml
       +'</div>';
   }).join('');
-  document.getElementById('ov-log').classList.add('open');
 }
-
-function _dl(rows,name){
-  var csv=rows.map(function(r){return r.map(function(c){var s=c==null?'':String(c);return '"'+s.replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
-  var a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent('\uFEFF'+csv);
-  a.download=name;a.style.display='none';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+function toggleChk(id){
+  var el=document.getElementById('chk-'+id);
+  var done=!el.classList.contains('checked');
+  el.classList.toggle('checked',done);el.textContent=done?'✓':'';
 }
-function exportExcel(){
-  var rows=[['#','Articulo','Categoria','Marca','Color','Ubicacion','Cantidad','Minimo','Maximo','Estado']];
-  inv.forEach(function(item,i){
-    var e=item.qty===0?'REPONER':item.qty<=item.min?'Stock bajo':'OK';
-    if(item.qtyIsText)e='Ver cantidad';
-    rows.push([i+1,item.name,item.cat,item.marca||'',item.color||'',item.ubicacion||'',item.qtyIsText?item.qtyDisplay:item.qty,item.min,item.max,e]);
+function saveControl(){
+  var selEl=document.getElementById('ctrl-mes-sel');
+  var mk=selEl&&selEl.value?selEl.value:(new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'));
+  var parts=mk.split('-');
+  var ml=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][parseInt(parts[1])-1]+' '+parts[0];
+  if(!control[mk])control[mk]={};
+  var done=0;
+  tasks.forEach(function(t){
+    var chk=document.getElementById('chk-'+t.id);
+    var obs=(document.getElementById('obs-'+t.id)||{}).value||'';
+    var isDone=chk&&chk.classList.contains('checked');
+    control[mk][t.id]={done:isDone,obs:obs};
+    if(isDone)done++;
   });
-  _dl(rows,'Bodega_Inventario.csv');
-  toast('Descargado: Bodega_Inventario.csv','ok');
+  hist.unshift({tipo:'control',tarea:'Control mensual',fecha:now(),mes:ml,
+    detalle:'Control '+ml+': '+done+'/'+tasks.length+' tareas completadas',
+    completadas:done,total:tasks.length});
+  saveAll(function(){closeOv('ov-control');toast('📅 Control guardado · '+done+'/'+tasks.length+' completadas','ok');});
 }
 
-function exportHistorialExcel(){
-  var rows=[['Tipo','Articulo','Categoria','Cantidad','Descripcion','Fecha','Observacion']];
-  histLog.forEach(function(h){rows.push([h.tipo,h.articulo,h.categoria||'',h.cantidad||'',h.desc||'',h.fecha||'',h.obs||'']);});
-  _dl(rows,'Historial_Bodega.csv');
-  toast('Historial descargado','ok');
+// ── HISTORIAL ─────────────────────────────────────────────────────
+function openHist(){renderHist();openOv('ov-hist');}
+function fh(f,btn){
+  _hf=f;
+  document.querySelectorAll('#hchips .chip').forEach(function(c){c.classList.remove('on');});
+  btn.classList.add('on');renderHist();
 }
-function toast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
-render();
-
-
-
-// ── HISTORIAL BODEGA ──────────────────────────────────────────────
-var _hf = 'todos';
-
-function openHistorial() {
-  _renderHist();
-  document.getElementById('ov-hist').classList.add('open');
-}
-
-function filterHist(f, btn) {
-  _hf = f;
-  document.querySelectorAll('#ov-hist .hist-chip').forEach(function(c) { c.classList.remove('active'); });
-  btn.classList.add('active');
-  _renderHist();
-}
-
-function _renderHist() {
-  var list = document.getElementById('hist-list');
-  var fil = histLog.filter(function(h) { return _hf === 'todos' || h.tipo === _hf; });
-  if (!fil.length) {
-    list.innerHTML = '<div class="hist-empty"><div style="font-size:36px">📋</div><p>Sin registros aún.<br>Los movimientos de inventario aparecerán aquí.</p></div>';
+function renderHist(){
+  var list=document.getElementById('hlist');
+  var q=(document.getElementById('hist-search')||{value:''}).value.toLowerCase().trim();
+  var mes=(document.getElementById('hist-fecha')||{value:''}).value;
+  var fil=hist.filter(function(h){
+    if(_hf!=='todos'&&h.tipo!==_hf)return false;
+    if(mes&&h.fecha&&h.fecha.substring(0,7)!==mes)return false;
+    if(q){
+      var haystack=(h.tarea||'')+(h.detalle||'')+(h.responsable||'')+(h.lugar||'')+(h.trabajo||'');
+      if(haystack.toLowerCase().indexOf(q)<0)return false;
+    }
+    return true;
+  });
+  if(!fil.length){
+    list.innerHTML='<div class="empty"><div style="font-size:36px">📋</div><p>'+(q||mes?'Sin resultados para esta búsqueda':'Sin registros aún')+'</p></div>';
     return;
   }
-  var labels = { compra: '🛒 Compra', uso: '🔧 Uso', venta: '💰 Venta', reposicion: '📦 Reposición' };
-  var bcls   = { compra: 'hb-compra', uso: 'hb-uso', venta: 'hb-venta', reposicion: 'hb-reposicion' };
-  var flbl   = { compra: 'Fecha de compra', uso: 'Fecha de uso', venta: 'Fecha de venta', reposicion: 'Fecha de reposición' };
-  list.innerHTML = fil.map(function(h) {
-    var q = h.cantidad;
-    var isPos = typeof q === 'string' ? q.charAt(0) === '+' : (typeof q === 'number' && q > 0);
-    var badge = '<span class="hist-badge ' + (bcls[h.tipo] || 'hb-uso') + '">' + (labels[h.tipo] || h.tipo) + '</span>';
-    var delta = '<span class="hist-delta ' + (isPos ? 'pos' : 'neg') + '">' + q + '</span>';
-    var rows = '<div class="hist-field"><strong>📅 ' + (flbl[h.tipo] || 'Fecha') + '</strong>' + h.fecha + '</div>';
-    rows += '<div class="hist-field"><strong>🏷️ Categoría</strong>' + (h.categoria || '—') + '</div>';
-    rows += '<div class="hist-field" style="grid-column:1/-1"><strong>📝 Descripción</strong>' + (h.desc || '') + '</div>';
-    var obs = h.obs ? '<div class="hist-obs">💬 ' + h.obs + '</div>' : '';
-    return '<div class="hist-item"><div class="hist-item-head"><span style="font-size:20px">' + (h.emoji || '📦') + '</span>' + badge + '<span class="hist-item-name">' + h.articulo + '</span>' + delta + '</div><div class="hist-rows">' + rows + '</div>' + obs + '</div>';
+  var lbl={exec:'✅ Ejecución',control:'📅 Control',add:'➕ Nueva',edit:'✏️ Edición'};
+  var bc={exec:'hb-done',control:'hb-pend',add:'hb-add',edit:'hb-edit'};
+  list.innerHTML=fil.map(function(h){
+    return'<div class="hi">'+
+      '<div class="hi-head">'+
+        '<span class="hbadge '+(bc[h.tipo]||'hb-add')+'">'+(lbl[h.tipo]||h.tipo)+'</span>'+
+        '<span class="hi-name">'+x(h.tarea||'—')+'</span>'+
+        '<span style="font-size:11px;color:var(--mu);font-family:monospace">'+h.fecha+'</span>'+
+      '</div>'+
+      '<div class="hi-rows">'+
+        '<div class="hi-f" style="grid-column:1/-1"><strong>📝 Detalle</strong>'+x(h.detalle||'')+'</div>'+
+        (h.fechaEjecucion?'<div class="hi-f"><strong>📅 Ejecución</strong>'+h.fechaEjecucion+'</div>':'')+
+        (h.responsable?'<div class="hi-f"><strong>👤 Responsable</strong>'+x(h.responsable)+'</div>':'')+
+        (h.lugar?'<div class="hi-f"><strong>📍 Lugar</strong>'+x(h.lugar)+'</div>':'')+
+        (h.trabajo?'<div class="hi-f" style="grid-column:1/-1"><strong>🔨 Trabajo</strong>'+x(h.trabajo)+'</div>':'')+
+        (h.materiales?'<div class="hi-f"><strong>🧰 Materiales</strong>'+x(h.materiales)+'</div>':'')+
+        (h.costo?'<div class="hi-f"><strong>💰 Costo</strong>$'+h.costo+'</div>':'')+
+        (h.estado?'<div class="hi-f"><strong>⭐ Estado</strong>'+h.estado+'</div>':'')+
+        (h.obs?'<div class="hi-f" style="grid-column:1/-1"><strong>💬 Obs.</strong>'+x(h.obs)+'</div>':'')+
+        (h.mes?'<div class="hi-f"><strong>📅 Mes</strong>'+h.mes+'</div>':'')+
+        (h.completadas!==undefined?'<div class="hi-f"><strong>✅ Completadas</strong>'+h.completadas+'/'+h.total+'</div>':'')+
+      '</div></div>';
   }).join('');
 }
 
+// ── EXCEL ─────────────────────────────────────────────────────────
+function exportXL(){
+  if(_role!=='admin'){toast('Solo el administrador','err');return;}
+  var rows=[['Tipo','Tarea','Categoria','Lugar','Fecha registro','Fecha ejecucion','Responsable','Trabajo','Materiales','Costo','Estado','Observaciones','Mes','Completadas']];
+  hist.forEach(function(h){
+    rows.push([h.tipo,h.tarea||'',h.cat||'',h.lugar||'',h.fecha||'',h.fechaEjecucion||'',
+      h.responsable||'',h.trabajo||'',h.materiales||'',h.costo||'',h.estado||'',
+      h.obs||h.detalle||'',h.mes||'',h.completadas!==undefined?h.completadas+'/'+h.total:'']);
+  });
+  var lines=[];
+  rows.forEach(function(r){
+    var cols=r.map(function(c){
+      var s=c==null?'':String(c);
+      return '"'+s.split('"').join('""')+'"';
+    }).join(',');
+    lines.push(cols);
+  });
+  var csv=lines.join('\r\n');
+  var bom='\uFEFF';
+  var blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Mantenimiento_'+new Date().toLocaleDateString('es-EC').split('/').join('-')+'.csv';
+  a.style.display='none';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Descargado','ok');
+}
+// ── UTILS ─────────────────────────────────────────────────────────
+function x(s){var t=s||'';return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function now(){return new Date().toLocaleString('es-EC',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';setTimeout(function(){t.classList.remove('show');},3000);}
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+
+// ── EVENT LISTENERS (no inline onclick for critical buttons) ──────
+document.addEventListener('DOMContentLoaded', function(){
+  
+
+  document.getElementById('auth-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doAuthLogin();});
+  document.getElementById('btn-logout').addEventListener('click',function(){fbLogout(function(){window._fbAuth.signOut();window._appRole='';_role='';showScreen('scr-login');document.getElementById('auth-email').value='';document.getElementById('auth-pass').value='';});});
+  document.getElementById('btn-add').addEventListener('click', openAdd);
+  document.getElementById('btn-control').addEventListener('click', openControl);
+  document.getElementById('btn-hist').addEventListener('click', openHist);
+  document.getElementById('btn-xl').addEventListener('click', exportXL);
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('fcat').addEventListener('change', render);
+  document.getElementById('fstatus').addEventListener('change', render);
+  document.querySelectorAll('.ov').forEach(function(o){
+    o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});
+  });
+});
 
 // Firebase auth token helper for secure DB requests
 function fbFetch(url, options, cb){
@@ -844,7 +1083,7 @@ function fbFetch(url, options, cb){
 function doAuthLogin(){
   var email=document.getElementById('auth-email').value.trim();
   var pass=document.getElementById('auth-pass').value;
-  var err=document.getElementById('login-err');
+  var err=document.getElementById('lerr');
   err.textContent='';
   if(!email||!pass){err.textContent='Completa correo y contraseña';return;}
   err.textContent='Verificando...';
@@ -853,14 +1092,12 @@ function doAuthLogin(){
       var role=window._ROLES[cred.user.uid];
       if(!role){window._fbAuth.signOut();err.textContent='Sin permiso de acceso';return;}
       window._appRole=role;
-      window._userEmail=cred.user.email||'';
-      window._bodegaRole=role;
-      err.textContent='Cargando...';
-      loadFromFirebase(function(e){
+      _role=role;
+      loadAll(function(e){
         if(e){err.textContent='Error: '+e.message;return;}
-        document.getElementById('login-screen').style.display='none';
-        document.getElementById('app-wrap').style.display='block';
-        startBodega(role);
+        document.getElementById('scr-login').style.display='none';
+        document.getElementById('scr-app').style.display='block';
+        startApp(role);
       });
     })
     .catch(function(e){
@@ -868,467 +1105,104 @@ function doAuthLogin(){
     });
 }
 
-function startBodega(role){
-  var rb=document.getElementById('rbadge');
-  if(rb) rb.textContent = role==='admin'?'🔑 Administrador':'🔧 Operador';
-  var btn=document.getElementById('btn-add-item');
-  if(btn){ btn.style.display=(role==='admin'||role==='oper')?'inline-block':'none'; btn.onclick=function(){openAddItem(null);}; }
-  render();
-}
-function openAddItem(id){
-  editId=null;
-  document.getElementById('add-title').textContent='➕ Agregar artículo';
-  ['f-em','f-name','f-cat','f-marca','f-ubic','f-color','f-proveedor','f-dir-proveedor','f-tel-proveedor','f-quien-compro','f-para-que','f-quien-solicito','f-obs'].forEach(function(fid){
-    var el=document.getElementById(fid); if(el) el.value='';
-  });
-  ['f-qty','f-min','f-max'].forEach(function(fid){
-    var el=document.getElementById(fid); if(el) el.value='';
-  });
-  var today=new Date().toISOString().split('T')[0];
-  var fd=document.getElementById('f-fecha-compra'); if(fd) fd.value=today;
-  var fc=document.getElementById('f-compra-section'); if(fc) fc.style.display='block';
-  document.getElementById('ov-add').classList.add('open');
-}
-function openHist(){
-  var hl=document.getElementById('hist-list');
-  if(!hl) return;
-  var src=histLog||logs||[];
-  if(!src.length){hl.innerHTML='<p style="color:var(--mu,#7a7f99);text-align:center;padding:20px">Sin movimientos registrados</p>';}
-  else{
-    hl.innerHTML=src.slice(0,50).map(function(h){
-      return '<div style="border-bottom:1px solid var(--bd,#2e3350);padding:10px 0">'+
-        '<div style="font-size:12px;font-weight:600">'+(h.emoji||'📦')+' '+(h.articulo||h.gameName||h.bien||'')+'</div>'+
-        '<div style="font-size:11px;color:var(--mu,#7a7f99)">'+(h.tipo||'')+' · '+(h.detalle||h.observacion||'')+'</div>'+
-        '<div style="font-size:10px;color:var(--ac,#6c63ff)">👤 '+(h.quien||'Sistema')+' · '+(h.fecha||'')+'</div>'+
-      '</div>';
-    }).join('');
-  }
-  openBov('ov-hist');
-}
-function openBov(id){document.getElementById(id).classList.add('open');}
-function closeBov(id){document.getElementById(id).classList.remove('open');}
-function doLogout(){
-  window._fbAuth.signOut();
-  window._bodegaRole='';window._appRole='';
-  document.getElementById('app-wrap').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('auth-email').value='';
-  document.getElementById('auth-pass').value='';
-}
-document.addEventListener('DOMContentLoaded',function(){
-  document.querySelectorAll('.bov').forEach(function(o){
-    o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});
-  });
-});
-
-function whoLabel(){
-  var r=window._role||window._appRole||'';
-  var email=window._userEmail||'';
-  if(r==='admin')return 'Administrador'+(email?' ('+email+')':'');
-  if(r==='oper')return 'Operador'+(email?' ('+email+')':'');
-  return r||'Sistema';
-}
-
 function openAudit(){
   var list=document.getElementById('audit-list');
   if(!list)return;
-  var lbl={compra:'Compra',uso:'Uso',venta:'Venta',reposicion:'Reposicion',alta:'Alta',edicion:'Edicion',baja:'Baja',toma_fisica:'Toma física'};
-  var clr={compra:'var(--gr)',uso:'var(--or)',venta:'var(--ac)',reposicion:'var(--gr)',alta:'var(--gr)',edicion:'var(--ye)',baja:'var(--re)',toma_fisica:'var(--ac)'};
-  var entries=(histLog||[]).slice();
-  list.innerHTML=entries.length?entries.map(function(h){
-    var tipo=h.tipo||'';
-    return '<div style="background:var(--s2,#22263a);border:1px solid var(--bd,#2e3350);border-radius:8px;padding:12px;margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-        +'<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+(clr[tipo]||'#7a7f99')+'22;color:'+(clr[tipo]||'#7a7f99')+'">'+(lbl[tipo]||tipo)+'</span>'
-        +'<span style="font-size:11px;color:#7a7f99;font-family:monospace">'+(h.fecha||'')+'</span>'
-      +'</div>'
-      +(h.emoji?'<span style="font-size:16px">'+h.emoji+'</span> ':'')
-      +'<strong style="font-size:13px">'+(h.articulo||h.name||'&mdash;')+'</strong>'
-      +(h.cantidad?'<div style="font-size:12px;color:#7a7f99">Cantidad: '+h.cantidad+'</div>':'')
-      +(h.desc?'<div style="font-size:12px;color:#7a7f99">'+h.desc+'</div>':'')
-      +(h.quien?'<div style="font-size:11px;color:#7a7f99;margin-top:4px">Registrado por: '+h.quien+'</div>':'')
-      +'</div>';
-  }).join(''):'<div style="color:#7a7f99;text-align:center;padding:20px">Sin registros</div>';
-  document.getElementById('ov-audit').classList.add('open');
-}
-
-function saveTxNew(){
-  var it = inv.find(function(i){return i.id===txId;});
-  if(!it){toast('Artículo no encontrado','err');return;}
-  var txDate = new Date().toLocaleString('es-EC',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  var histEntry = {tipo: txType==='compra'?'compra':(txType==='fisica'?'toma_fisica':'uso'), emoji:it.emoji, articulo:it.name, categoria:it.cat, fecha:txDate, quien:whoLabel()};
-
-  if(txType==='fisica'){
-    var qtyF = (document.getElementById('tx-qty-fisica').value||'').trim();
-    if(!qtyF){toast('Ingresa la cantidad contada','err');return;}
-    var fechaF = document.getElementById('tx-fecha-fisica').value;
-    if(!fechaF){toast('Ingresa la fecha de la toma','err');return;}
-    var quienF = (document.getElementById('tx-quien-fisica').value||'').trim();
-    var obsF = (document.getElementById('tx-obs-fisica').value||'').trim();
-    var qtyNumF = parseFloat(qtyF);
-    var isNumF = !isNaN(qtyNumF) && !/[a-zA-Z]/.test(qtyF);
-    var sistemaAntes = it.qtyIsText ? (it.qtyDisplay||'') : (it.qty||0);
-    var diffTxt = '';
-    var hayFaltante = false;
-    if(isNumF && !it.qtyIsText){
-      var diff = qtyNumF - (it.qty||0);
-      it.qty = Math.max(0, qtyNumF);
-      if(diff<0){diffTxt = '⚠️ Faltante de '+Math.abs(diff); hayFaltante = true;}
-      else if(diff>0) diffTxt = '➕ Sobrante de '+diff;
-      else diffTxt = '✅ Sin diferencia';
-    } else if(it.qtyIsText){
-      it.qtyDisplay = qtyF+' (toma física)';
-    }
-    histEntry.cantidad = qtyF;
-    histEntry.sistemaAntes = sistemaAntes;
-    histEntry.diferencia = diffTxt;
-    histEntry.quienConto = quienF;
-    histEntry.obs = obsF;
-    histEntry.fechaTx = fechaF;
-    histEntry.desc = 'Toma física: contado '+qtyF+(sistemaAntes!==''?' (sistema tenía '+sistemaAntes+')':'')+(diffTxt?' · '+diffTxt:'');
-    logs.unshift({itemId:txId,itemName:it.name,itemEmoji:it.emoji,type:'fisica',delta:isNumF?qtyNumF:qtyF,desc:histEntry.desc,date:txDate});
-    histLog.unshift(histEntry);
-    save(function(){ closeBov('ov-tx'); render(); });
-    toast(hayFaltante?'⚠️ Toma física registrada — '+diffTxt:'🔍 Toma física registrada','ok');
-    return;
-  }
-
-  if(txType==='compra'){
-    var qty = (document.getElementById('tx-qty-compra').value||'').trim();
-    var proveedor = (document.getElementById('tx-proveedor').value||'').trim();
-    var quienCompro = (document.getElementById('tx-quien-compro').value||'').trim();
-    var paraQue = (document.getElementById('tx-para-que-compra').value||'').trim();
-    if(!qty){toast('Ingresa la cantidad','err');return;}
-    if(!proveedor){toast('Ingresa el proveedor','err');return;}
-    if(!quienCompro){toast('Ingresa quién compró','err');return;}
-    if(!paraQue){toast('Ingresa para qué se compró','err');return;}
-    var qtyNum = parseFloat(qty);
-    if(!isNaN(qtyNum) && !/[a-zA-Z]/.test(qty)){
-      if(!it.qtyIsText) it.qty = (it.qty||0) + Math.abs(qtyNum);
-    }
-    histEntry.cantidad = '+'+qty;
-    histEntry.proveedor = proveedor;
-    histEntry.dirProveedor = (document.getElementById('tx-dir-proveedor').value||'').trim();
-    histEntry.telProveedor = (document.getElementById('tx-tel-proveedor').value||'').trim();
-    histEntry.quienCompro = quienCompro;
-    histEntry.paraQue = paraQue;
-    histEntry.quienSolicito = (document.getElementById('tx-quien-solicito-compra').value||'').trim();
-    histEntry.obs = (document.getElementById('tx-obs-compra').value||'').trim();
-    histEntry.fechaTx = document.getElementById('tx-fecha-compra').value;
-    histEntry.desc = 'Compra a '+proveedor+' | '+paraQue;
-    logs.unshift({itemId:txId,itemName:it.name,itemEmoji:it.emoji,type:'compra',delta:qtyNum||qty,desc:histEntry.desc,date:txDate});
-    toast('✅ Compra registrada','ok');
-
+  var entries=hist.filter(function(h){return h.tipo!=='control';});
+  if(!entries.length){
+    list.innerHTML='<div style="color:var(--mu);text-align:center;padding:20px">Sin registros de auditoría</div>';
   } else {
-    var qtyU = (document.getElementById('tx-qty-uso').value||'').trim();
-    var quienSol = (document.getElementById('tx-quien-solicita').value||'').trim();
-    var paraQueU = (document.getElementById('tx-para-que-uso').value||'').trim();
-    if(!qtyU){toast('Ingresa la cantidad','err');return;}
-    if(!quienSol){toast('Ingresa quién solicita','err');return;}
-    if(!paraQueU){toast('Ingresa para qué se utiliza','err');return;}
-    var qtyNumU = parseFloat(qtyU);
-    if(!isNaN(qtyNumU) && !/[a-zA-Z]/.test(qtyU)){
-      if(!it.qtyIsText) it.qty = Math.max(0, (it.qty||0) - Math.abs(qtyNumU));
-    }
-    histEntry.cantidad = '-'+qtyU;
-    histEntry.quienSolicita = quienSol;
-    histEntry.paraQue = paraQueU;
-    histEntry.obs = (document.getElementById('tx-obs-uso').value||'').trim();
-    histEntry.fechaTx = document.getElementById('tx-fecha-uso').value;
-    histEntry.desc = 'Uso por '+quienSol+' | '+paraQueU;
-    logs.unshift({itemId:txId,itemName:it.name,itemEmoji:it.emoji,type:'uso',delta:-(qtyNumU||0),desc:histEntry.desc,date:txDate});
-    toast('🔧 Uso registrado','ok');
+    var lbl={exec:'✅ Ejecución',add:'➕ Nueva tarea',edit:'✏️ Edición',del:'🗑 Eliminación'};
+    list.innerHTML=entries.map(function(h){
+      return '<div style="background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-weight:700;color:var(--ac)">'+(lbl[h.tipo]||h.tipo||'—')+'</span>'
+        +'<span style="color:var(--mu);font-family:monospace">'+h.fecha+'</span></div>'
+        +'<div style="font-weight:600">'+x(h.tarea||h.detalle||'')+'</div>'
+        +(h.quien?'<div style="color:var(--mu)">👤 '+x(h.quien)+'</div>':'')
+        +(h.detalle&&h.tarea?'<div style="color:var(--mu)">'+x(h.detalle)+'</div>':'')
+        +'</div>';
+    }).join('');
   }
-  histLog.unshift(histEntry);
-  save(function(){ closeBov('ov-tx'); render(); });
+  openOv('ov-audit');
 }
 
-function abrirReporte(){
-  // Set current month as default
-  var now = new Date();
-  var mes = now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
-  document.getElementById('rpt-mes').value = mes;
-  // Populate categories
-  var catSel = document.getElementById('rpt-cat');
-  var cats = [...new Set(inv.map(function(i){return i.cat||'Sin categoría';}))].sort();
-  catSel.innerHTML = '<option value="">Todas las categorías</option>' +
-    cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
-  document.getElementById('ov-reporte').classList.add('open');
-}
-
-function descargarReporte(){
-  var mes = document.getElementById('rpt-mes').value;
-  var stockF = document.getElementById('rpt-stock').value;
-  var catF = document.getElementById('rpt-cat').value;
-  
-  // Filter inventory
-  var items = inv.filter(function(it){
-    var qty = it.qtyIsText ? 0 : (parseFloat(it.qty)||0);
-    if(catF && it.cat !== catF) return false;
-    if(stockF==='sinstock') return qty<=0;
-    if(stockF==='constock') return qty>0;
-    if(stockF==='bajomin') return !it.qtyIsText && qty < (it.min||0);
-    if(stockF==='sobremax') return !it.qtyIsText && (it.max||0)>0 && qty > it.max;
-    return true;
+function exportControl(){
+  var mes=document.getElementById('ctrl-mes-sel').value||
+    (new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'));
+  var rows=[['Tarea','Categoría','Frecuencia','Responsable','Lugar','Estado','Completada']];
+  tasks.forEach(function(t){
+    rows.push([
+      t.name||'',t.cat||'',
+      (t.freq?t.freq+'d ('+({'7':'Semanal','15':'Quincenal','30':'Mensual','60':'Bimestral','90':'Trimestral','180':'Semestral','365':'Anual'}[String(t.freq)]||t.freq+'d')+')':''),
+      t.responsable||t.resp||'',t.lugar||'',
+      getStatus(t)==='over'?'Vencida':getStatus(t)==='soon'?'Próxima':'Al día',
+      t.done?'Sí':'No'
+    ]);
   });
-
-  // Build CSV
-  var rows = [['Articulo','Emoji','Categoria','Marca','Ubicacion','Stock Actual','Minimo','Maximo','Estado Stock']];
-  items.forEach(function(it){
-    var qty = it.qtyIsText ? (it.qtyDisplay||'texto') : (it.qty||0);
-    var qtyN = parseFloat(qty)||0;
-    var estado = it.qtyIsText?'Texto':qtyN<=0?'SIN STOCK':qtyN<(it.min||0)?'BAJO MINIMO':(it.max||0)>0&&qtyN>it.max?'SOBRE MAXIMO':'OK';
-    rows.push([it.name, it.emoji||'', it.cat||'', it.marca||'', it.ubicacion||'', qty, it.min||0, it.max||0, estado]);
-  });
-
-  // Add movement history for the selected month if provided
-  if(mes){
-    rows.push([]);
-    rows.push(['--- MOVIMIENTOS DEL MES: '+mes+' ---']);
-    rows.push(['Fecha','Articulo','Tipo','Cantidad','Proveedor/Quien','Para que','Registrado por']);
-    var movs = histLog.filter(function(h){
-      return h.fechaTx && h.fechaTx.startsWith(mes);
-    });
-    movs.forEach(function(h){
-      rows.push([h.fechaTx||h.fecha||'', h.articulo||'', h.tipo||'', h.cantidad||'',
-        h.proveedor||h.quienSolicita||h.quienCompro||'', h.paraQue||h.desc||'', h.quien||'']);
-    });
-    if(!movs.length) rows.push(['Sin movimientos registrados para este mes']);
-  }
-
-  var csv = rows.map(function(r){
-    return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');
-  }).join('\n');
-  
-  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'bodega-reporte-'+(mes||'completo')+'.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📥 Reporte descargado','ok');
-  closeBov('ov-reporte');
-}
-
-var _editMovIdx = -1;
-function editMovimiento(idx){
-  if(!isAdmin()){toast('Solo el administrador puede editar movimientos','err');return;}
-  _editMovIdx = idx;
-  var h = histLog[idx];
-  if(!h) return;
-  // Fill edit modal
-  document.getElementById('em-tipo').textContent = h.tipo||h.type||'';
-  document.getElementById('em-cantidad').value = String(h.cantidad||'').replace(/[^0-9.]/g,'');
-  document.getElementById('em-fechaTx').value = h.fechaTx||h.fecha||'';
-  document.getElementById('em-proveedor').value = h.proveedor||'';
-  document.getElementById('em-dir').value = h.dirProveedor||'';
-  document.getElementById('em-tel').value = h.telProveedor||'';
-  document.getElementById('em-quienCompro').value = h.quienCompro||h.quienSolicita||h.quienSolicito||h.quienConto||'';
-  document.getElementById('em-paraQue').value = h.paraQue||'';
-  document.getElementById('em-obs').value = h.obs||h.desc||'';
-  document.getElementById('ov-log-edit').classList.add('open');
-}
-
-function saveMovimiento(){
-  if(_editMovIdx<0) return;
-  var h = histLog[_editMovIdx];
-  var articulo = h.articulo;
-  var newCantidad = document.getElementById('em-cantidad').value.trim();
-  // Normalize: strip sign, store clean number
-  var cleanCant = newCantidad.replace(/[^0-9.]/g,'');
-  var isCompra = h.tipo==='compra'||h.tipo==='alta'||h.tipo==='reposicion';
-  var isFisica = h.tipo==='toma_fisica';
-  h.cantidad = isFisica ? (cleanCant||'0') : (isCompra?'+':'-') + (cleanCant||'0');
-  h.fechaTx  = document.getElementById('em-fechaTx').value;
-  h.proveedor= document.getElementById('em-proveedor').value.trim();
-  h.dirProveedor=document.getElementById('em-dir').value.trim();
-  h.telProveedor=document.getElementById('em-tel').value.trim();
-  var quien = document.getElementById('em-quienCompro').value.trim();
-  if(isFisica) h.quienConto=quien; else if(isCompra) h.quienCompro=quien; else h.quienSolicita=quien;
-  h.paraQue  = document.getElementById('em-paraQue').value.trim();
-  h.obs      = document.getElementById('em-obs').value.trim();
-  h.editadoPor = whoLabel();
-  h.editadoFecha = new Date().toLocaleString('es-EC',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  // Always recalculate stock
-  var newQty = recalcStock(articulo);
-  save(function(){
-    closeBov('ov-log-edit');
-    toast('Movimiento actualizado. Stock: '+(newQty||0),'ok');
-    render();
-  });
-}
-
-function toggleHist(id, btn){
-  var el=document.getElementById('hist-inline-'+id);
-  if(!el)return;
-  var open=el.style.display==='none';
-  el.style.display=open?'block':'none';
-  btn.textContent=open?'📋 Ocultar historial':'📋 Ver historial';
-}
-
-function recalcStock(articulo){
-  var it = inv.find(function(i){return i.name===articulo;});
-  if(!it||it.qtyIsText) return;
-  // histLog entries are newest-first (unshift order); walk from newest until
-  // we hit a toma_fisica entry — that count is the real baseline, so anything
-  // older than it is superseded and should not be re-summed.
-  var entries = histLog.filter(function(e){return e.articulo===articulo;});
-  var total = 0;
-  for(var i=0;i<entries.length;i++){
-    var e = entries[i];
-    var tipo = e.tipo||e.type||'';
-    if(tipo==='toma_fisica'){
-      var baseStr = String(e.cantidad||'').replace(/[^0-9.]/g,'');
-      total += parseFloat(baseStr)||0;
-      break;
-    }
-    var cantStr = String(e.cantidad||'').replace(/[^0-9.]/g,'');
-    var cant = parseFloat(cantStr)||0;
-    if(tipo==='compra'||tipo==='alta'||tipo==='reposicion') total += cant;
-    else if(tipo==='uso'||tipo==='venta'||tipo==='baja') total -= cant;
-  }
-  it.qty = Math.max(0, Math.round(total*100)/100);
-  return it.qty;
-}
-
-function eliminarMovimiento(idx){
-  if(!isAdmin()){toast('Solo el administrador puede eliminar movimientos','err');return;}
-  var h = histLog[idx];
-  if(!h) return;
-  if(!confirm('Eliminar este movimiento de '+h.articulo+'? El stock se actualizará.')) return;
-  var articulo = h.articulo;
-  histLog.splice(idx, 1);
-  var newQty = recalcStock(articulo);
-  save(function(){
-    toast('Movimiento eliminado. Stock: '+(newQty||0),'ok');
-    render();
-  });
+  var csv=rows.map(function(r){
+    return r.map(function(c){
+      var s=String(c==null?'':c);
+      return '"'+s.replace(/"/g,'""')+'"';
+    }).join(',');
+  }).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='Control_'+mes+'.csv';
+  a.style.display='none';document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('✅ Descargado','ok');
 }
 
 // Global exports
 window.isAdmin=isAdmin;
 window.isOper=isOper;
-window.save=save;
-window.loadFromFirebase=loadFromFirebase;
-window.st=st;
-window.displayQty=displayQty;
+window.auditEntry=auditEntry;
+window.saveAll=saveAll;
+window.loadAll=loadAll;
+window.showScreen=showScreen;
+window.tryLogin=tryLogin;
+window.doLogin=doLogin;
+window.startApp=startApp;
+window.doLogout=doLogout;
+window.getStatus=getStatus;
+window.getDaysText=getDaysText;
 window.render=render;
 window.openAdd=openAdd;
 window.openEdit=openEdit;
-window.closeAdd=closeAdd;
-window.saveItem=saveItem;
-window.delItem=delItem;
-window.openTx=openTx;
-window.setTxType=setTxType;
-window.closeTx=closeTx;
-window.saveTx=saveTx;
-window.openLog=openLog;
-window._dl=_dl;
-window.exportExcel=exportExcel;
-window.exportHistorialExcel=exportHistorialExcel;
+window.saveTask=saveTask;
+window.delTask=delTask;
+window.openExec=openExec;
+window.openInfo=openInfo;
+window.saveExec=saveExec;
+window.openControl=openControl;
+window.openFechas=openFechas;
+window.renderFechas=renderFechas;
+window.saveFechas=saveFechas;
+window.openCronograma=openCronograma;
+window.renderCronograma=renderCronograma;
+window.toggleCronoCheck=toggleCronoCheck;
+window.downloadCronograma=downloadCronograma;
+window.getWeekKey=getWeekKey;
+window.loadControlMes=loadControlMes;
+window.filterControl=filterControl;
+window.renderControlGrid=renderControlGrid;
+window.toggleChk=toggleChk;
+window.saveControl=saveControl;
+window.openHist=openHist;
+window.fh=fh;
+window.renderHist=renderHist;
+window.exportXL=exportXL;
+window.x=x;
+window.now=now;
 window.toast=toast;
-window.openHistorial=openHistorial;
-window.filterHist=filterHist;
-window._renderHist=_renderHist;
+window.openOv=openOv;
+window.closeOv=closeOv;
 window.fbFetch=fbFetch;
 window.doAuthLogin=doAuthLogin;
-window.startBodega=startBodega;
-window.openAddItem=openAddItem;
-window.openHist=openHist;
-window.openBov=openBov;
-window.closeBov=closeBov;
-window.doLogout=doLogout;
-window.whoLabel=whoLabel;
 window.openAudit=openAudit;
-window.saveTxNew=saveTxNew;
-window.abrirReporte=abrirReporte;
-window.descargarReporte=descargarReporte;
-window.editMovimiento=editMovimiento;
-window.saveMovimiento=saveMovimiento;
-window.toggleHist=toggleHist;
-window.recalcStock=recalcStock;
-window.eliminarMovimiento=eliminarMovimiento;
+window.exportControl=exportControl;
 </script>
-
-<!-- HISTORIAL MODAL -->
-<div class="ov" id="ov-hist">
-<div class="modal hist-modal">
-  <h3 style="margin-bottom:4px">📋 Historial de movimientos</h3>
-  <p style="font-size:12px;color:var(--mu);margin-bottom:14px">Registro completo: compras, usos, ventas y reposiciones</p>
-  <div class="hist-filters">
-    <button class="hist-chip active" onclick="filterHist('todos',this)">Todos</button>
-    <button class="hist-chip" onclick="filterHist('compra',this)">🛒 Compras</button>
-    <button class="hist-chip" onclick="filterHist('uso',this)">🔧 Usos</button>
-    <button class="hist-chip" onclick="filterHist('venta',this)">💰 Ventas</button>
-    <button class="hist-chip" onclick="filterHist('reposicion',this)">📦 Reposiciones</button>
-  </div>
-  <div class="hist-list" id="hist-list"></div>
-  <div class="mf">
-    <button class="btn-gh" onclick="document.getElementById('ov-hist').classList.remove('open')">Cerrar</button>
-    <button class="btn btn-p" style="background:var(--gr);color:#000;font-size:12px" onclick="exportHistorialExcel()">📊 Exportar</button>
-  </div>
-</div>
-</div>
-
-
-<div class="ov" id="ov-audit"><div class="modal" style="max-width:520px">
-  <h3>📊 Auditoría de bodega</h3>
-  <p style="font-size:12px;color:#7a7f99;margin-bottom:12px">Registro de todos los movimientos y cambios</p>
-  <div id="audit-list" style="max-height:60vh;overflow-y:auto"></div>
-  <div style="display:flex;justify-content:flex-end;margin-top:12px">
-    <button class="btn-gh" onclick="document.getElementById('ov-audit').classList.remove('open')">Cerrar</button>
-  </div>
-</div></div>
-
-<!-- MODAL REPORTE MENSUAL -->
-<div class="ov" id="ov-reporte">
-<div class="bmodal" style="max-width:440px">
-  <h3 style="margin-bottom:14px">📥 Descargar Reporte</h3>
-  <div style="margin-bottom:12px">
-    <div class="blbl">Mes</div>
-    <input type="month" id="rpt-mes" class="binp" style="margin-top:4px">
-  </div>
-  <div style="margin-bottom:12px">
-    <div class="blbl">Filtrar por stock</div>
-    <select id="rpt-stock" class="binp" style="margin-top:4px">
-      <option value="todos">Todos los artículos</option>
-      <option value="sinstock">Sin stock (cantidad = 0)</option>
-      <option value="constock">Con stock (cantidad > 0)</option>
-      <option value="bajomin">Bajo mínimo</option>
-      <option value="sobremax">Sobre máximo</option>
-    </select>
-  </div>
-  <div style="margin-bottom:14px">
-    <div class="blbl">Filtrar por categoría</div>
-    <select id="rpt-cat" class="binp" style="margin-top:4px">
-      <option value="">Todas las categorías</option>
-    </select>
-  </div>
-  <div style="display:flex;justify-content:flex-end;gap:8px">
-    <button onclick="closeBov('ov-reporte')" class="bbtn-ghost">Cancelar</button>
-    <button onclick="descargarReporte()" class="bbtn-ac">📥 Descargar CSV</button>
-  </div>
-</div>
-</div>
-
-<div class="bov" id="ov-log-edit"><div class="bmodal" style="max-width:440px;max-height:90vh;overflow-y:auto">
-  <h3 style="margin-bottom:4px;font-size:15px">✏️ Editar movimiento</h3>
-  <p id="em-tipo" style="font-size:12px;color:var(--ac,#6c63ff);margin-bottom:14px;font-weight:700"></p>
-  <div style="margin-bottom:10px"><div class="blbl">Fecha</div><input type="date" id="em-fechaTx" class="binp" style="margin-top:4px"></div>
-  <div style="margin-bottom:10px"><div class="blbl">Cantidad</div><input id="em-cantidad" class="binp" style="margin-top:4px"></div>
-  <div style="margin-bottom:10px"><div class="blbl">Proveedor / Quién solicitó</div><input id="em-proveedor" class="binp" style="margin-top:4px"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-    <div><div class="blbl">Dirección proveedor</div><input id="em-dir" class="binp" style="margin-top:4px"></div>
-    <div><div class="blbl">Teléfono proveedor</div><input id="em-tel" class="binp" style="margin-top:4px"></div>
-  </div>
-  <div style="margin-bottom:10px"><div class="blbl">Quién compró / solicitó</div><input id="em-quienCompro" class="binp" style="margin-top:4px"></div>
-  <div style="margin-bottom:10px"><div class="blbl">Para qué</div><input id="em-paraQue" class="binp" style="margin-top:4px"></div>
-  <div style="margin-bottom:14px"><div class="blbl">Observaciones</div><textarea id="em-obs" class="binp" rows="2" style="margin-top:4px;resize:none"></textarea></div>
-  <div style="display:flex;justify-content:flex-end;gap:8px">
-    <button onclick="closeBov('ov-log-edit')" class="bbtn-ghost">Cancelar</button>
-    <button onclick="saveMovimiento()" class="bbtn-ac">💾 Guardar</button>
-  </div>
-</div></div>
 </body>
 </html>
